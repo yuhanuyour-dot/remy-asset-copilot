@@ -1,10 +1,10 @@
 # Windows 安装包构建
 
-运行安装包的用户不需要安装 Python、Node.js、.NET SDK 或 Inno Setup。需要 Windows x64 Rhino 8.0+（8.x）。8.0–8.11 使用 Rhino 随附的 .NET 7；8.12+ 支持 .NET 7/8，启动入口优先使用已安装的 .NET 8。缺少运行时请修复 Rhino 安装。
+运行安装包的用户不需要安装 Python、Node.js、.NET SDK 或 Inno Setup。需要 Windows x64 Rhino 8.0+（8.x）。安装包兼容 Rhino 自带的 Framework / Core 模式，不修改运行时偏好。正常打开 Rhino 后直接输入 AssetCopilot。
 
 ## 构建环境
 
-- Windows x64、.NET 8 SDK。NuGet 自动获取 RhinoCommon 8.0.23304.9001 和 WebView2 1.0.1938.49；插件编译目标 net7.0-windows。无需本机 Rhino 开发引用。
+- Windows x64、.NET 8 SDK。NuGet 自动获取 RhinoCommon 8.0.23304.9001 和 WebView2 1.0.1938.49；源码可编译 net48 / net7.0-windows；安装包选用 net48 通用兼容目标。无需本机 Rhino 开发引用。
 - Python 3.9+，仅使用标准库；Inno Setup 6.7.3。
 - 运行组件目录：从已安装的 Full 版本取 `runtime/`，通过 `-RuntimeSource` 指定。大型组件不提交到 Git。
 - 本次使用 Node 24.19.0、Transformers.js 3.8.1、ONNX Runtime 1.21.0。模型和依赖锁定信息见 `runtime-manifests/`。
@@ -26,7 +26,7 @@ Standard 约 25 MiB，包含 GLB 解码需要的 Node；Full 约 166 MiB，额�
 
 ```powershell
 dotnet run --project .\installer\tests\AppPaths.Tests.csproj
-powershell -NoProfile -ExecutionPolicy Bypass -File .\installer\tests\RhinoRuntime.Tests.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\installer\tests\LaunchContract.Tests.ps1
 ```
 
 `/DQA=1` 可编译隔离测试安装器：使用不同的 AppId 和 Rhino 注册测试分支，不影响真实插件注册。正式发布不要使用该开关。
@@ -39,8 +39,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\installer\tests\RhinoRunti
 
 ## Rhino 版本兼容
 
-启动器与安装器分别测试 8.0、8.11、8.12、8.20、8.35 边界。8.0–8.11 使用 `/netcore`，避免传入当时尚不存在的 `/netcore-8`。本版支持 .NET Core 模式，不支持 Rhino 的 .NET Framework 模式；优先使用安装器创建的启动入口。
+分发单一 net48 插件，使用 Rhino 8.0 官方 SDK 作为 API 基线，并在 Rhino 8.35 的 Framework / .NET 7 / .NET 8 三种运行模式验证。Rhino 8.0 原版仍待实机测试。Core 构建目标保留用于开发回归，不能混入 net48 的发布目录。
 
-Rhino 8.0 SDK 只发布 net48 引用，项目有意把它作为 .NET 7 的编译接口基线；不打包 RhinoCommon/Rhino.UI/Eto DLL。8.7 才引入的 Texture.TreatAsLinear 通过可选反射启用：8.7+ 保留原贴图色彩处理，8.0–8.6 使用宿主原生通道默认处理。
+安装器仅验证 Rhino 8 版本，不强制用户选择 Core；启动器只运行 AssetCopilot 命令，不传 /netcore 或 /netfx 参数，不写全局运行时注册表。程序集 GUID 和命令保持不变。
 
-已在现有 Rhino 8.35 上验证 .NET 7.0.1 与 .NET 8。8.0 原版宿主尚未实机验证，发布前建议让早期 Rhino 8 用户试装。详见验证记录-0.5.1.md。
+替代 API 集中在 Compat.cs，包含超时/取消、参数转义、文件原子替换等。新增依赖锁定在 csproj，版本及许可证清单保存在 runtime-manifests/dotnet-0.5.2.json 与 viewer/vendor/dotnet。
+
+8.7 才有的 Texture.TreatAsLinear 保持可选调用，早期 Rhino 使用宿主原生通道默认值。详见验证记录-0.5.2.md。

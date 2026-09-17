@@ -89,12 +89,12 @@ public static class Sizing
         // A specific phrase such as 'floor plant' wins over its contained generic word 'plant'.
         return spans.Where(a=>!spans.Any(b=>a.Id!=b.Id&&b.Start<=a.Start&&b.End>=a.End&&(b.Start<a.Start||b.End>a.End))).Select(a=>a.Id).Distinct().ToArray();
     }
-    static void Positive(double value,string name){if(!double.IsFinite(value)||value<=0)throw new ArgumentException(name+"必须是有效正数。");}
+    static void Positive(double value,string name){if(!Compat.IsFinite(value)||value<=0)throw new ArgumentException(name+"必须是有效正数。");}
     public static SizingDecision Resolve(SizingSettings settings,string text,string fileName,double[]? span,double documentMeters,FaceReference? reference,SizeEstimate? inferred=null)
     {
         Positive(documentMeters,"文档单位");
-        if(span!=null&&(span.Length!=3||span.Any(x=>!double.IsFinite(x)||x<0)))throw new ArgumentException("模型没有有效的三维尺寸。");
-        if(!Enum.IsDefined(settings.Mode))throw new ArgumentException("请选择有效尺寸方式。");
+        if(span!=null&&(span.Length!=3||span.Any(x=>!Compat.IsFinite(x)||x<0)))throw new ArgumentException("模型没有有效的三维尺寸。");
+        if(!Enum.IsDefined(typeof(SizeMode),settings.Mode))throw new ArgumentException("请选择有效尺寸方式。");
         var result=new SizingDecision{Mode=settings.Mode};
         if(settings.Mode==SizeMode.Manual)
         {
@@ -124,7 +124,7 @@ public static class Sizing
                 if(reference==null)throw new ArgumentException("请先在 Rhino 选择一个平面作为尺寸参照。");
                 Positive(reference.ShortMeters,"参考面短边");Positive(reference.LongMeters,"参考面长边");Positive(reference.AreaSquareMeters,"参考面面积");
                 double edge=preset.LongReference?reference.LongMeters:reference.ShortMeters;
-                if(inferred?.Axis>=0)result.TargetMeters=inferred.Meters;else result.TargetMeters=Math.Clamp(edge*preset.RoomFraction,preset.Min,preset.Max);
+                if(inferred?.Axis>=0)result.TargetMeters=inferred.Meters;else result.TargetMeters=Compat.Clamp(edge*preset.RoomFraction,preset.Min,preset.Max);
                 bool limited=false;
                 if(span!=null)
                 {

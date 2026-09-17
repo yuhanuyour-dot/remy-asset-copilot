@@ -28,7 +28,7 @@ public static class MaterialMaps
         var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(bmp));
         using var output=new MemoryStream();encoder.Save(output);return output.ToArray();
     }
-    static byte Byte(double value)=>(byte)Math.Clamp(Math.Round(value*255),0,255);
+    static byte Byte(double value)=>(byte)Compat.Clamp(Math.Round(value*255),0,255);
     static double Srgb(double v)=>v<=.0031308?v*12.92:1.055*Math.Pow(v,1/2.4)-.055;
     static double Linear(double v)=>v<=.04045?v/12.92:Math.Pow((v+.055)/1.055,2.4);
     public static byte[] ConvertMap(TextureMap map,Part p,string kind)
@@ -67,7 +67,7 @@ public static class MaterialMaps
         Directory.CreateDirectory(folder);
         byte[] data=kind=="emission"?map.Bytes:ConvertMap(map,part,kind);
         if(kind=="emission"){var pixels=Pixels(data,out var w,out var h);data=Encode(pixels,w,h);}
-        var path=Path.Combine(folder,kind+"_"+Convert.ToHexString(SHA256.HashData(data))[..16]+".png");
+        var path=Path.Combine(folder,kind+"_"+Compat.HashHex(data)[..16]+".png");
         if(!File.Exists(path))File.WriteAllBytes(path,data);
         return path;
     }

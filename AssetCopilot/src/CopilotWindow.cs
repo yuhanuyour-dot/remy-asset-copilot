@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -42,7 +42,7 @@ public sealed partial class CopilotWindow : Window
     public CopilotWindow(string? sample=null)
     {
         AssetStore.Initialize();
-        Title="Remy Asset Copilot 0.5.1";Width=540;Height=Math.Min(910,SystemParameters.WorkArea.Height-40);MinWidth=450;MinHeight=620;
+        Title="Remy Asset Copilot 0.5.2";Width=540;Height=Math.Min(910,SystemParameters.WorkArea.Height-40);MinWidth=450;MinHeight=620;
         WindowStartupLocation=WindowStartupLocation.CenterScreen;Background=new SolidColorBrush(Color.FromRgb(245,245,247));FontFamily=new FontFamily("Microsoft YaHei UI");FontSize=12;
         Resources.Add(typeof(Button),XamlReader.Parse("<Style xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' TargetType='Button'><Setter Property='Cursor' Value='Hand'/><Setter Property='Padding' Value='12,8'/><Setter Property='Background' Value='#EEEEF1'/><Setter Property='Foreground' Value='#252527'/><Setter Property='BorderThickness' Value='0'/><Setter Property='Margin' Value='0,3,6,3'/><Setter Property='Template'><Setter.Value><ControlTemplate TargetType='Button'><Border CornerRadius='16' Background='{TemplateBinding Background}' Padding='{TemplateBinding Padding}'><ContentPresenter HorizontalAlignment='Center' VerticalAlignment='Center'/></Border><ControlTemplate.Triggers><Trigger Property='IsEnabled' Value='False'><Setter Property='Opacity' Value='0.4'/></Trigger><Trigger Property='IsMouseOver' Value='True'><Setter Property='Opacity' Value='0.82'/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style>"));
         var root=new StackPanel{Margin=new Thickness(18,14,18,18)};
@@ -148,12 +148,12 @@ public sealed partial class CopilotWindow : Window
         if(model.SelectedIndex<0)return;
         syncFaces=true;faceSlider.Maximum=model.SelectedIndex==0?25000:2000000;
         if(!int.TryParse(faces.Text,out int n))n=5000;
-        n=Math.Clamp(n,500,(int)faceSlider.Maximum);faceSlider.Value=n;faces.Text=n.ToString();
+        n=Compat.Clamp(n,500,(int)faceSlider.Maximum);faceSlider.Value=n;faces.Text=n.ToString();
         faceRange.Text=$"目标三角面数：500–{faceSlider.Maximum:N0} · 格式固定 GLB";syncFaces=false;
     }
     GenerationOptions Options(){if(!int.TryParse(faces.Text,out int n))throw new ArgumentException("面数必须是整数。");var o=new GenerationOptions(model.SelectedIndex==0?GenerationOptions.P2:GenerationOptions.V31,n);o.Validate();return o;}
     void SaveDirectory(){try{AssetStore.SetRoot(saveRoot.Text);saveRoot.Text=AssetStore.SaveRoot();SetStatus("保存目录已更新");}catch(Exception e){Error(e);}}
-    void OpenFolder(string path){Directory.CreateDirectory(path);Process.Start(new ProcessStartInfo("explorer.exe"){ArgumentList={path},UseShellExecute=false,CreateNoWindow=true});}
+    void OpenFolder(string path){Directory.CreateDirectory(path);var start=new ProcessStartInfo("explorer.exe"){UseShellExecute=false,CreateNoWindow=true};Compat.SetArguments(start,path);Process.Start(start);}
     void RequestPhoto()
     {
         // Defer native dialogs until the WebView2 message callback has returned.

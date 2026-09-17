@@ -1,13 +1,13 @@
-# Remy Asset Copilot 0.5.1 Beta
+# Remy Asset Copilot 0.5.2 Beta
 
-兼容性更新：Windows 安装版最低版本从 Rhino 8.35 扩展到 Rhino 8.0（8.x）。插件改为 .NET 7 目标，使用官方 Rhino 8.0 SDK 编译，兼容 Rhino 的 .NET 7 / .NET 8 模式。
+安装后，用户可正常打开 Rhino，在命令行输入 `AssetCopilot`（无空格）直接打开插件。
 
-- 启动器自动选择已安装的兼容运行时：8.0–8.11 使用 .NET 7，8.12+ 优先 .NET 8，无需修改 Rhino 全局设置。
-- 替换 .NET 8 专有文件夹选择器；Rhino 8.7+ 的线性贴图接口采用可选调用，早期版本使用宿主通道默认值。
-- UI、动画、尺寸方式、预览与场景放置流程保持不变。
-- 已安装 0.5.0 通用版可使用 Update；首次安装和 0.4.x 迁移使用 Standard 或 Full。
-- 关闭 Rhino 后更新。原数据目录、模型、设置保留；仍支持选择任意本机程序/数据目录。
+- 同时兼容 Rhino 的 .NET Framework、.NET 7 和 .NET 8 模式，解决 0.5.1 在 Framework 模式下初始化失败的问题。
+- 无需专用启动器，无需 SetDotNetRuntime，不修改 Rhino 的全局运行时设置。
+- 保持原有 UI、动画、材质预览、三种尺寸方式、输入及场景放置流程。
+- 安装时关闭所有 Rhino；安装完成后正常启动 Rhino，输入 AssetCopilot。
+- 首次安装推荐 Full；Standard 不含本地图片尺寸识别；Update 用于已有 0.5.0/0.5.1 通用安装。
 
-验证：Rhino 8.0 SDK 构建通过；131 项 .NET 7 核心检查通过；Rhino 8.35 中 .NET 7.0.1 与 .NET 8.0.24 各通过 161 项界面/材质/尺寸/放置检查；30 项启动版本策略检查通过。
+要求 Windows 10/11 x64、Rhino 8.0 起的 8.x。使用 Rhino 8.0 SDK 构建；本机 Rhino 8.35 上的 Framework、.NET 7、.NET 8 各通过 161 项界面与场景检查，Framework 核心检查 134 项通过。Rhino 8.0 原版仍待实机验证。
 
-兼容性限制：本机未安装 Rhino 8.0 原版，早期宿主仍需用户试装；不覆盖 Rhino 7、Rhino 9、macOS 或 .NET Framework 模式。安装包尚未代码签名。在线生成需用户自己的 Tripo API Key 与额度。
+在线生成需要自己的 Tripo API Key 和额度。安装包尚未代码签名。发布本版时请创建新标签 v0.5.2 并上传对应 0.5.2 EXE，不要继续分发旧版 0.5.1 作为默认安装包。

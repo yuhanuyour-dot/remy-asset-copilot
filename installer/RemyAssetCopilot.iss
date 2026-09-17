@@ -1,4 +1,4 @@
-﻿#define Version "0.5.1"
+﻿#define Version "0.5.2"
 #ifndef Variant
   #define Variant "Standard"
 #endif
@@ -62,7 +62,6 @@ Name: "desktopicon"; Description: "创建桌面快捷方式 / Create desktop sho
 [Files]
 Source: "{#Payload}\AssetCopilot\*"; DestDir: "{app}\AssetCopilot"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: core
 Source: "{#Payload}\Start-AssetCopilot.*"; DestDir: "{app}"; Flags: ignoreversion; Components: core
-Source: "{#Payload}\RhinoRuntime.ps1"; DestDir: "{app}"; Flags: ignoreversion; Components: core
 Source: "{#Payload}\Install-Update.ps1"; DestDir: "{app}"; Flags: ignoreversion; Components: core
 Source: "{#Payload}\使用说明.txt"; DestDir: "{app}"; Flags: ignoreversion; Components: core
 #if Variant != "Update"
@@ -117,43 +116,6 @@ end;
 function RhinoExecutable(Param: String): String;
 begin Result := RhinoPage.Values[0]; end;
 
-function DesktopRuntimeExists(RuntimeMajor: String): Boolean;
-var Found: TFindRec; DotnetRoot, RegistryRoot: String;
-begin
-  DotnetRoot := ExpandConstant('{pf64}\dotnet');
-  if RegQueryStringValue(HKLM64, 'SOFTWARE\dotnet\Setup\InstalledVersions\x64', 'InstallLocation', RegistryRoot) then
-    if RegistryRoot <> '' then DotnetRoot := RegistryRoot;
-  Result := FindFirst(AddBackslash(DotnetRoot) + 'shared\Microsoft.WindowsDesktop.App\' + RuntimeMajor + '.*', Found);
-  if Result then FindClose(Found);
-end;
-
-function ChooseRuntimeArgument(Major, Minor: Word; Has7, Has8: Boolean): String;
-begin
-  Result := '';
-  if Major <> 8 then Exit;
-  if Minor < 12 then begin
-    if Has7 then Result := '/netcore';
-  end else if Has8 then Result := '/netcore-8'
-  else if Has7 then Result := '/netcore-7';
-end;
-
-#ifdef QA
-procedure CheckRuntimePolicy;
-begin
-  if (ChooseRuntimeArgument(8, 0, True, False) <> '/netcore') or
-     (ChooseRuntimeArgument(8, 11, True, True) <> '/netcore') or
-     (ChooseRuntimeArgument(8, 0, False, True) <> '') or
-     (ChooseRuntimeArgument(8, 12, True, True) <> '/netcore-8') or
-     (ChooseRuntimeArgument(8, 19, True, False) <> '/netcore-7') or
-     (ChooseRuntimeArgument(8, 20, False, True) <> '/netcore-8') or
-     (ChooseRuntimeArgument(8, 35, False, False) <> '') or
-     (ChooseRuntimeArgument(7, 35, True, True) <> '') or
-     (ChooseRuntimeArgument(9, 0, True, True) <> '') then
-       RaiseException('Compatibility policy test failed.');
-  Log('PASS: Rhino 8.0+ compatibility policy (9 cases).');
-end;
-#endif
-
 function RhinoIsRunning: Boolean;
 var Locator, Services, Processes: Variant;
 begin
@@ -171,12 +133,9 @@ end;
 
 procedure InitializeWizard;
 begin
-#ifdef QA
-  CheckRuntimePolicy;
-#endif
   RhinoPage := CreateInputFilePage(wpSelectDir, T('查找 Rhino', 'Locate Rhino'),
     T('选择 Rhino 8 的程序位置', 'Choose your Rhino 8 executable'),
-    T('支持 Windows x64、Rhino 8.0 起的全部 Rhino 8 小版本；启动时选择兼容的 .NET 运行时。', 'Supports Windows x64 and Rhino 8.0 onward (8.x). Uses a compatible .NET 7 or 8 runtime.'));
+    T('支持 Windows x64、Rhino 8.0 起的 8.x；兼容 .NET Framework 与 .NET 7/8，无需切换 Rhino 设置。', 'Supports Windows x64, Rhino 8.0 onward (8.x), .NET Framework and .NET 7/8. No Rhino runtime changes needed.'));
   RhinoPage.Add('Rhino.exe:', 'Rhino executable|Rhino.exe', '.exe');
   RhinoPage.Values[0] := ExpandConstant('{param:RHINOEXE|' + DetectRhino + '}');
   DataPage := CreateInputDirPage(RhinoPage.ID, T('模型与数据目录', 'Models and data'),
@@ -219,9 +178,6 @@ begin
   if (CompareText(ExtractFileName(RhinoPage.Values[0]), 'Rhino.exe') <> 0) or
      not GetVersionComponents(RhinoPage.Values[0], Major, Minor, Build, Revision) or (Major <> 8) then begin
     Result := T('请选择 Rhino 8.0 或之后的 Rhino 8。', 'Select Rhino 8.0 or a later Rhino 8 release.'); Exit;
-  end;
-  if ChooseRuntimeArgument(Major, Minor, DesktopRuntimeExists('7'), DesktopRuntimeExists('8')) = '' then begin
-    Result := T('未找到兼容的 .NET 桌面运行时。Rhino 8.0–8.11 需要 .NET 7；8.12+ 可用 .NET 7 或 8。请修复 Rhino 安装后重试。', 'Compatible Desktop Runtime missing: Rhino 8.0-8.11 needs .NET 7; 8.12+ supports .NET 7 or 8. Repair Rhino and retry.'); Exit;
   end;
   Marker := AddBackslash(WizardDirValue) + 'remy-install.ini';
   Existing := GetIniString('Storage', 'DataRoot', '', Marker);
@@ -273,7 +229,7 @@ begin
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
-var Marker, Backup: String;
+var Marker, Backup, LegacyDependencies: String;
 begin
   if (CurStep = ssInstall) and FileExists(ExpandConstant('{app}\AssetCopilot\dist\AssetCopilot.rhp')) then begin
     Backup := AddBackslash(DataPage.Values[0]) + 'backups\install-' + GetDateTimeString('yyyymmdd-hhnnss-zzz', '-', ':');
@@ -281,6 +237,12 @@ begin
     if FileExists(ExpandConstant('{app}\remy-install.ini')) then
       FileCopy(ExpandConstant('{app}\remy-install.ini'), Backup + '\remy-install.ini', False);
     SaveStringToFile(Backup + '\previous-plugin-path.txt', OldPlugin, False);
+    // 0.5.1 shipped a Core-only dependency manifest. The universal assembly
+    // resolves the adjacent Framework-compatible dependencies on all runtimes.
+    // Remove only this obsolete installer-owned file, after backing it up.
+    LegacyDependencies := ExpandConstant('{app}\AssetCopilot\dist\AssetCopilot.deps.json');
+    if FileExists(LegacyDependencies) and not DeleteFile(LegacyDependencies) then
+      RaiseException('Could not remove the backed-up legacy dependency manifest.');
   end;
   if CurStep = ssPostInstall then begin
     Marker := ExpandConstant('{app}\remy-install.ini');

@@ -25,7 +25,7 @@ public sealed class TripoClient : IDisposable, IGenerationClient
     }
     string Safe(string value)
     {
-        value=value.Replace(secret,"[密钥已隐藏]",StringComparison.Ordinal);
+        value=value.Replace(secret,"[密钥已隐藏]");
         value=Regex.Replace(value,@"(?i)Bearer\s+[^\s""<>]+|\b(?:sk|tripo)[-_][a-zA-Z0-9_-]+","[密钥已隐藏]");
         value=Regex.Replace(value,@"https?://\S+|[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}","[地址已隐藏]");
         value=Regex.Replace(value,@"\s+"," ").Trim();
@@ -50,7 +50,7 @@ public sealed class TripoClient : IDisposable, IGenerationClient
             }
             bool apiError=doc!=null && doc.RootElement.ValueKind==JsonValueKind.Object && doc.RootElement.TryGetProperty("code",out var code) && code.ToString()!="0";
             if(!response.IsSuccessStatusCode || apiError)
-                throw new HttpRequestException($"阶段：{stage}\nHTTP {(int)response.StatusCode}\n{detail}\n\n403 本身不能证明余额不足或密钥错误。可先点“检查连接”进行只读鉴权检查；不要重复提交生成。",null,response.StatusCode);
+                throw Compat.HttpError($"阶段：{stage}\nHTTP {(int)response.StatusCode}\n{detail}\n\n403 本身不能证明余额不足或密钥错误。可先点“检查连接”进行只读鉴权检查；不要重复提交生成。",response.StatusCode);
             if(doc==null) throw new InvalidDataException($"{stage}：接口返回了非 JSON 内容，请检查网络或服务状态。");
             var root=doc.RootElement;
             if(root.ValueKind!=JsonValueKind.Object || !root.TryGetProperty("data",out var data)) throw new InvalidDataException($"{stage}：响应缺少 data 字段。");
@@ -119,8 +119,8 @@ public sealed class TripoClient : IDisposable, IGenerationClient
         if(response.Content.Headers.ContentLength>150*1024*1024) throw new InvalidDataException("模型文件超过 150 MB 上限。");
         using var input=await response.Content.ReadAsStreamAsync(ct); using var output=File.Create(path+".partial");
         byte[] buffer=new byte[81920]; long total=0; int n;
-        while((n=await input.ReadAsync(buffer,ct))>0) { total+=n; if(total>150*1024*1024) throw new InvalidDataException("模型文件超过 150 MB 上限。"); await output.WriteAsync(buffer.AsMemory(0,n),ct); }
-        output.Close(); File.Move(path+".partial",path,true);
+        while((n=await input.ReadAsync(buffer,0,buffer.Length,ct))>0) { total+=n; if(total>150*1024*1024) throw new InvalidDataException("模型文件超过 150 MB 上限。"); await output.WriteAsync(buffer,0,n,ct); }
+        output.Close(); Compat.ReplaceFile(path+".partial",path);
     }
     public void Dispose() { api.Dispose(); files.Dispose(); }
 }

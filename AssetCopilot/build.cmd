@@ -5,5 +5,5 @@ set "DOTNET_CLI_HOME=%~dp0..\work\dotnet"
 set "TEMP=%~dp0..\work"
 set "TMP=%TEMP%"
 if not exist "%TEMP%" mkdir "%TEMP%"
-dotnet build "%~dp0AssetCopilot.csproj" -c Release -o "%~dp0dist-next" --nologo %*
+dotnet build "%~dp0AssetCopilot.csproj" -c Release -f net48 -o "%~dp0dist-universal" --nologo %*
 exit /b %errorlevel%

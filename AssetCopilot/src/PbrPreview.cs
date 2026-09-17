@@ -1,4 +1,4 @@
-﻿using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
 using System.Text.Json;
 using System.Reflection;
@@ -10,8 +10,8 @@ namespace AssetCopilot;
 public sealed class PbrPreview : WebView2
 {
     Task? initialization;
-    readonly TaskCompletionSource ready = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    TaskCompletionSource? pending;
+    readonly TaskCompletionSource<bool> ready = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    TaskCompletionSource<bool>? pending;
     string request="", loadedPath="";
     readonly SemaphoreSlim loadGate=new(1,1);
     string sessionFolder="";
@@ -56,10 +56,10 @@ public sealed class PbrPreview : WebView2
             var topLeft=clipViewport.PointToScreen(new Point());
             var bottomRight=clipViewport.PointToScreen(new Point(clipViewport.ActualWidth,clipViewport.ActualHeight));
             int width=Math.Max(0,host.Right-host.Left),height=Math.Max(0,host.Bottom-host.Top);
-            int left=Math.Clamp((int)Math.Ceiling(topLeft.X-host.Left),0,width);
-            int top=Math.Clamp((int)Math.Ceiling(topLeft.Y-host.Top),0,height);
-            int right=Math.Clamp((int)Math.Floor(bottomRight.X-host.Left),0,width);
-            int bottom=Math.Clamp((int)Math.Floor(bottomRight.Y-host.Top),0,height);
+            int left=Compat.Clamp((int)Math.Ceiling(topLeft.X-host.Left),0,width);
+            int top=Compat.Clamp((int)Math.Ceiling(topLeft.Y-host.Top),0,height);
+            int right=Compat.Clamp((int)Math.Floor(bottomRight.X-host.Left),0,width);
+            int bottom=Compat.Clamp((int)Math.Floor(bottomRight.Y-host.Top),0,height);
             if(right>left&&bottom>top)clip=(left,top,right,bottom);
         }
         if(clippedHandle==Handle&&lastClip==clip)return;
@@ -97,18 +97,18 @@ public sealed class PbrPreview : WebView2
         var viewerFiles=Path.Combine(folder,"viewer");
         foreach(var file in Directory.EnumerateFiles(viewerFiles,"*",SearchOption.AllDirectories))
         {
-            var target=Path.Combine(sessionFolder,Path.GetRelativePath(viewerFiles,file));Directory.CreateDirectory(Path.GetDirectoryName(target)!);File.Copy(file,target);
+            var target=Path.Combine(sessionFolder,Compat.GetRelativePath(viewerFiles,file));Directory.CreateDirectory(Path.GetDirectoryName(target)!);File.Copy(file,target);
         }
         CoreWebView2.SetVirtualHostNameToFolderMapping("copilot.local",sessionFolder,CoreWebView2HostResourceAccessKind.DenyCors);
         CoreWebView2.WebMessageReceived+=(_,e)=>
         {
             if(!e.Source.StartsWith("https://copilot.local/",StringComparison.Ordinal))return;
             using var json=JsonDocument.Parse(e.WebMessageAsJson);var root=json.RootElement;var type=root.GetProperty("type").GetString();
-            if(type=="ready"){SurfaceReady=true;UpdateSurfaceVisibility();ready.TrySetResult();PublishStatus();StartupStateChanged?.Invoke();return;}
+            if(type=="ready"){SurfaceReady=true;UpdateSurfaceVisibility();ready.TrySetResult(true);PublishStatus();StartupStateChanged?.Invoke();return;}
             if(type=="pick-image"){if(!interactionBlocked)ImageRequested?.Invoke();return;}
             if(!root.TryGetProperty("id",out var id)){ready.TrySetException(new InvalidOperationException("PBR 预览初始化失败。"));return;}
             if(id.GetString()!=request)return;
-            if(type=="loaded"){Statistics=root.GetProperty("stats").GetRawText();pending?.TrySetResult();}
+            if(type=="loaded"){Statistics=root.GetProperty("stats").GetRawText();pending?.TrySetResult(true);}
             else if(type=="error")pending?.TrySetException(new InvalidOperationException("PBR 预览失败："+root.GetProperty("message").GetString()));
         };
         CoreWebView2.Navigate("https://copilot.local/index.html");
@@ -139,7 +139,7 @@ public sealed class PbrPreview : WebView2
     public void ReportStatus(string text,bool persistent=false){progressText=text;statusPersistent=persistent;PublishStatus();}
     void PublishStatus()
     {
-        if(!disposed&&ready.Task.IsCompletedSuccessfully&&CoreWebView2!=null)
+        if(!disposed&&ready.Task.Status==TaskStatus.RanToCompletion&&CoreWebView2!=null)
             CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new{type="presentation",busy=interactionBlocked,text=progressText,persistent=statusPersistent}));
     }
     public void ClearModel()

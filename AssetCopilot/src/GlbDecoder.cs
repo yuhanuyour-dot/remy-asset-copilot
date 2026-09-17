@@ -23,14 +23,14 @@ public static class GlbDecoder
         try
         {
             var info = new ProcessStartInfo(node) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardError = true };
-            info.ArgumentList.Add(script); info.ArgumentList.Add(Path.GetFullPath(path)); info.ArgumentList.Add(output);
+            Compat.SetArguments(info,script,Path.GetFullPath(path),output);
             Process process;
             try { process = Process.Start(info) ?? throw new IOException("解码器未启动。"); }
             catch (System.ComponentModel.Win32Exception) { throw new IOException("压缩模型需要 Node.js 运行时。请重新安装标准版或完整版，再打开 Rhino 导入缓存模型，无需重新生成。"); }
             using (process)
             {
                 var error = process.StandardError.ReadToEndAsync();
-                if (!process.WaitForExit(60000)) { process.Kill(true); throw new IOException("本地模型解压超时，原模型已保留。"); }
+                if (!process.WaitForExit(60000)) { process.Kill(); throw new IOException("本地模型解压超时，原模型已保留。"); }
                 if (process.ExitCode != 0) throw new IOException("本地模型解压失败，原模型已保留。请检查插件 tools 文件夹是否完整。");
             }
             var result = GlbReader.Read(File.ReadAllBytes(output));

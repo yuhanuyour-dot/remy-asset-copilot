@@ -1,0 +1,44 @@
+{
+  "Microsoft.Bcl.AsyncInterfaces/8.0.0": {
+    "type": "package"
+  },
+  "Microsoft.NETFramework.ReferenceAssemblies/1.0.3": {
+    "type": "package"
+  },
+  "Microsoft.NETFramework.ReferenceAssemblies.net48/1.0.3": {
+    "type": "package"
+  },
+  "Microsoft.Web.WebView2/1.0.1938.49": {
+    "type": "package"
+  },
+  "PolySharp/1.16.0": {
+    "type": "package"
+  },
+  "RhinoCommon/8.0.23304.9001": {
+    "type": "package"
+  },
+  "System.Buffers/4.5.1": {
+    "type": "package"
+  },
+  "System.Memory/4.5.5": {
+    "type": "package"
+  },
+  "System.Numerics.Vectors/4.5.0": {
+    "type": "package"
+  },
+  "System.Runtime.CompilerServices.Unsafe/6.0.0": {
+    "type": "package"
+  },
+  "System.Text.Encodings.Web/8.0.0": {
+    "type": "package"
+  },
+  "System.Text.Json/8.0.6": {
+    "type": "package"
+  },
+  "System.Threading.Tasks.Extensions/4.5.4": {
+    "type": "package"
+  },
+  "System.ValueTuple/4.5.0": {
+    "type": "package"
+  }
+}

@@ -17,8 +17,8 @@ public static class GlbReader
             if (pos + 8 > bytes.Length) throw new InvalidDataException("GLB 分块损坏。");
             int len = checked((int)U(bytes, pos)); uint type = U(bytes, pos + 4); pos += 8;
             if (len < 0 || len > bytes.Length - pos) throw new InvalidDataException("GLB 长度错误。");
-            if (type == 0x4E4F534A) json = bytes[pos..(pos + len)];
-            if (type == 0x004E4942) bin = bytes[pos..(pos + len)];
+            if (type == 0x4E4F534A) json = bytes.AsSpan(pos,len).ToArray();
+            if (type == 0x004E4942) bin = bytes.AsSpan(pos,len).ToArray();
             pos += len;
         }
         if (json == null || bin == null) throw new InvalidDataException("GLB 缺少数据。");
@@ -65,7 +65,7 @@ public static class GlbReader
                     p.AlphaMode=m.TryGetProperty("alphaMode",out var alpha)?alpha.GetString()!:"OPAQUE";
                     p.AlphaCutoff=F(m,"alphaCutoff",.5f);p.DoubleSided=m.TryGetProperty("doubleSided",out var ds)&&ds.GetBoolean();
                 }
-                if (p.Vertices.Any(v => !float.IsFinite(v.X) || !float.IsFinite(v.Y) || !float.IsFinite(v.Z))) throw new InvalidDataException("几何含无效坐标。");
+                if (p.Vertices.Any(v => !Compat.IsFinite(v.X) || !Compat.IsFinite(v.Y) || !Compat.IsFinite(v.Z))) throw new InvalidDataException("几何含无效坐标。");
                 data.Parts.Add(p);
                 if (data.FaceCount > 2000000 || data.Parts.Sum(x => x.Vertices.Count) > 6000000) throw new InvalidDataException("超过 200 万三角面／600 万顶点上限，请先减面。");
             }
@@ -123,7 +123,7 @@ public static class GlbReader
         var v = root.GetProperty("bufferViews")[index]; if(I(v,"buffer",0)!=0) throw new InvalidDataException("不支持外部 Buffer。");
         int start=I(v,"byteOffset",0),len=v.GetProperty("byteLength").GetInt32();
         if(start<0 || len<0 || start>bin.Length-len) throw new InvalidDataException("Buffer 越界。");
-        return bin[start..(start+len)];
+        return bin.AsSpan(start,len).ToArray();
     }
     static double[] Access(JsonElement root,byte[] bin,int index,int count,bool integer)
     {

@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Automation;
 using System.Windows.Input;
@@ -116,7 +116,7 @@ public sealed partial class CopilotWindow
                 bodyCard.Background=cardBackground;composerFrame.Margin=new Thickness(0,0,0,16);
                 fullScroll.VerticalScrollBarVisibility=ScrollBarVisibility.Auto;RefreshCompactFeedback();
                 if(expandedState==WindowState.Maximized)WindowState=WindowState.Maximized;
-                else{double h=Math.Min(expandedBounds.Height,work.Height);Top=Math.Clamp(Top,work.Top,Math.Max(work.Top,work.Bottom-h));Height=h;}
+                else{double h=Math.Min(expandedBounds.Height,work.Height);Top=Compat.Clamp(Top,work.Top,Math.Max(work.Top,work.Bottom-h));Height=h;}
                 MinHeight=Math.Min(620,work.Height);viewport.SetSurfaceActive(true);
             }
             UpdateViewButton();UpdateLayout();
@@ -136,7 +136,7 @@ public sealed partial class CopilotWindow
         double contentHeight=modeHeader.DesiredSize.Height+modeRoot.Margin.Top+composerFrame.DesiredSize.Height+compactFeedback.DesiredSize.Height+modeRoot.Margin.Bottom;
         double target=Math.Min(work.Height,Math.Ceiling(contentHeight+chromeHeight+1));
         MinHeight=target;if(Math.Abs(Height-target)>.5)Height=target;
-        Top=Math.Clamp(Top,work.Top,Math.Max(work.Top,work.Bottom-target));
+        Top=Compat.Clamp(Top,work.Top,Math.Max(work.Top,work.Bottom-target));
     }
     void QueueCompactResize()
     {

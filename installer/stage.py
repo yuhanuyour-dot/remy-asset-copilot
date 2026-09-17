@@ -13,14 +13,16 @@ runtime=(a.runtime or root/'runtime').resolve()
 def copy(src,dst):
     dst.parent.mkdir(parents=True,exist_ok=True); shutil.copy2(src,dst)
 
-source=root/'AssetCopilot/dist-next'
+source=root/'AssetCopilot/dist-universal'
 for f in source.rglob('*'):
     if f.is_file() and f.suffix.lower() not in ('.pdb',) and f.name != 'AssetCopilot.dll':
         copy(f,out/'AssetCopilot/dist'/f.relative_to(source))
 for rel in ['AssetCopilot/sample/demo-chair.glb','AssetCopilot/THIRD-PARTY-NOTICES.md',
-            'Start-AssetCopilot.cmd','Start-AssetCopilot.ps1','Start-AssetCopilot.vbs','RhinoRuntime.ps1','Install-Update.ps1',
+            'Start-AssetCopilot.cmd','Start-AssetCopilot.ps1','Start-AssetCopilot.vbs','Install-Update.ps1',
             'runtime/node.exe','runtime/NODE-LICENSE.txt']:
-    copy(runtime/Path(rel).relative_to('runtime') if rel.startswith('runtime/') else root/rel,out/rel)
+    source_file = runtime/Path(rel).relative_to('runtime') if rel.startswith('runtime/') else root/rel
+    if rel == 'Start-AssetCopilot.ps1': source_file=root/'installer/launcher/Start-AssetCopilot.ps1'
+    copy(source_file,out/rel)
 # Only remove native binaries for other operating systems/architectures.
 # Preserve all licenses, dependency metadata, JS dependencies and Windows x64 libraries.
 vision=runtime/'vision'

@@ -19,3 +19,7 @@ The preview loads local scripts and embedded GLB assets only. No API keys are pa
 - Node.js: bundled runtime under runtime/node.exe; see https://github.com/nodejs/node/blob/main/LICENSE .
 
 Inference loads only local model weights with allowRemoteModels=false. A private image snapshot under the selected data directory in work/ is deleted on completion. No Tripo key is passed to this subprocess. CLIP visual labels plus product size heuristics provide estimates, not camera-based measurements or exact physical scale.
+
+## Framework compatibility (0.5.2)
+
+System.Text.Json 8.0.6 and its Microsoft dependencies are distributed under their NuGet licenses (MIT). Exact resolved versions are recorded in installer/runtime-manifests/dotnet-0.5.2.json; license texts are retained in viewer/vendor/dotnet. PolySharp 1.16.0 (MIT) generates compile-time compatibility types and is not a runtime service. No Rhino runtime setting is modified.

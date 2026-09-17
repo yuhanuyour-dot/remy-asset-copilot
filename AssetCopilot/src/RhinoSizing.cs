@@ -45,7 +45,7 @@ public static class RhinoSizing
             using var properties=AreaMassProperties.Compute(trimmed);
             if(properties==null||!bounds.IsValid)throw new ArgumentException("无法测量所选参考面。");
             double meters=RhinoPlacement.Meters(doc),w=bounds.Max.X-bounds.Min.X,h=bounds.Max.Y-bounds.Min.Y;
-            if(!double.IsFinite(properties.Area)||properties.Area<=doc.ModelAbsoluteTolerance*doc.ModelAbsoluteTolerance||w<=doc.ModelAbsoluteTolerance||h<=doc.ModelAbsoluteTolerance)throw new ArgumentException("参考面面积过小或无效，请重新选择。");
+            if(!Compat.IsFinite(properties.Area)||properties.Area<=doc.ModelAbsoluteTolerance*doc.ModelAbsoluteTolerance||w<=doc.ModelAbsoluteTolerance||h<=doc.ModelAbsoluteTolerance)throw new ArgumentException("参考面面积过小或无效，请重新选择。");
             return new FaceReference{Session=session,DocumentSerial=doc.RuntimeSerialNumber,ObjectId=objectId,FaceIndex=faceIndex,FaceCount=brep.Faces.Count,ShortMeters=Math.Min(w,h)*meters,LongMeters=Math.Max(w,h)*meters,AreaSquareMeters=properties.Area*meters*meters};
         }
         finally{owned?.Dispose();}
@@ -69,7 +69,7 @@ public static class RhinoSizing
             if(!plane.IsValid||Enumerable.Range(0,mesh.Vertices.Count).Any(i=>Math.Abs(plane.DistanceTo(mesh.Vertices.Point3dAt(i)))>doc.ModelAbsoluteTolerance))throw new ArgumentException("请选择整个平面网格，或 Ctrl+Shift 选择其中的单个平面。");
             var bounds=mesh.GetBoundingBox(plane);using var area=AreaMassProperties.Compute(mesh);
             double meters=RhinoPlacement.Meters(doc),w=bounds.Max.X-bounds.Min.X,h=bounds.Max.Y-bounds.Min.Y;
-            if(area==null||!double.IsFinite(area.Area)||area.Area<=doc.ModelAbsoluteTolerance*doc.ModelAbsoluteTolerance||w<=doc.ModelAbsoluteTolerance||h<=doc.ModelAbsoluteTolerance)throw new ArgumentException("网格面的尺寸或面积无效。");
+            if(area==null||!Compat.IsFinite(area.Area)||area.Area<=doc.ModelAbsoluteTolerance*doc.ModelAbsoluteTolerance||w<=doc.ModelAbsoluteTolerance||h<=doc.ModelAbsoluteTolerance)throw new ArgumentException("网格面的尺寸或面积无效。");
             return new FaceReference{Session=session,DocumentSerial=doc.RuntimeSerialNumber,ObjectId=id,FaceIndex=index,FaceCount=original.Faces.Count,GeometryKind="Mesh",ShortMeters=Math.Min(w,h)*meters,LongMeters=Math.Max(w,h)*meters,AreaSquareMeters=area.Area*meters*meters};
         }
         finally{selected?.Dispose();}

@@ -1,23 +1,26 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFrameworks>net48;net7.0-windows</TargetFrameworks>
     <UseWPF>true</UseWPF>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <UseWindowsForms>true</UseWindowsForms>
-    <LangVersion>12.0</LangVersion>
+    <LangVersion>12.0</LangVersion><PolySharpUseEmbeddedAttributeForGeneratedTypes>false</PolySharpUseEmbeddedAttributeForGeneratedTypes>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>AssetCopilot</AssemblyName>
-    <Version>0.5.1</Version>
+    <Version>0.5.2</Version>
 
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="src\*.cs" />
+    <Compile Include="src\*.cs" /><Reference Include="System.Net.Http" Condition="'$(TargetFramework)' == 'net48'" />
     <Content Include="tools\*" CopyToOutputDirectory="PreserveNewest" />
     <!-- Rhino 8.0 SDK is published as net48; its API surface is intentionally consumed from .NET 7. -->
     <PackageReference Include="RhinoCommon" Version="8.0.23304.9001" IncludeAssets="compile" PrivateAssets="all" NoWarn="NU1701" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1938.49" />
+    <PackageReference Include="PolySharp" Version="1.16.0" PrivateAssets="all" />
+    <PackageReference Include="System.Text.Json" Version="8.0.6" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" Condition="'$(TargetFramework)' == 'net48'" />
     <Using Remove="System.Windows.Forms" />
     <Using Remove="System.Drawing" />
     <Content Include="viewer/**/*" Link="viewer/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
@@ -27,3 +30,4 @@
     <Delete Files="$(TargetPath)" />
   </Target>
 </Project>
+

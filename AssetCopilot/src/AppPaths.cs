@@ -32,13 +32,13 @@ public static class AppPaths
             foreach (var raw in File.ReadAllLines(marker))
             {
                 var line = raw.Trim();
-                if (line.StartsWith('[') && line.EndsWith(']')) { section = line[1..^1]; continue; }
+                if (line.StartsWith("[",StringComparison.Ordinal) && line.EndsWith("]",StringComparison.Ordinal)) { section = line[1..^1]; continue; }
                 int equals = line.IndexOf('=');
                 if (equals < 0 || !section.Equals("Storage", StringComparison.OrdinalIgnoreCase)) continue;
                 if (line[..equals].Trim().Equals("DataRoot", StringComparison.OrdinalIgnoreCase))
                 {
                     var value = line[(equals + 1)..].Trim();
-                    if (!Path.IsPathFullyQualified(value)) throw new IOException("安装配置中的数据目录无效，请重新运行安装程序。");
+                    if (!Compat.IsPathFullyQualified(value)) throw new IOException("安装配置中的数据目录无效，请重新运行安装程序。");
                     return Path.GetFullPath(value);
                 }
             }

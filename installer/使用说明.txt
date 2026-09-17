@@ -1,14 +1,14 @@
-Remy Asset Copilot 0.5.1 Beta · Windows 安装版
+Remy Asset Copilot 0.5.2 Beta · Windows 安装版
 
-适用：Windows 10/11 x64；Rhino 8.0 起的 Rhino 8；兼容的 .NET 7 或 .NET 8 桌面运行时 x64。
-当前实测：Windows、Rhino 8.35、.NET 7 / .NET 8。早期 Rhino 8 宿主仍需外部试装。此版本不支持 macOS。
+适用：Windows 10/11 x64；Rhino 8.0 起的 Rhino 8；Rhino 自带的 .NET Framework 或 .NET 7/8 运行模式。
+当前实测：Windows、Rhino 8.35、.NET Framework / .NET 7 / .NET 8。早期 Rhino 8 宿主仍需外部试装。此版本不支持 macOS。
 
 安装
 1. 保存项目并退出全部 Rhino 窗口。
 2. 运行 Setup 安装程序，确认检测到的 Rhino.exe。
 3. 选择程序目录及数据目录；不需要 D 盘，也不需要安装 Node.js。
 4. 如需从图片自动估算现实尺寸，使用 Full 完整版并勾选本地图片识别组件。
-5. 安装后从开始菜单打开 Remy Asset Copilot，或在 Rhino 输入 AssetCopilot。
+5. 正常打开 Rhino，在命令行输入 AssetCopilot（无空格）即可；不需要专用启动器，也不用切换运行时。
 
 安装包选择
 Standard：插件、GLB 解码运行环境、材质预览、文字/图片生成、手动/文字估算/参考面尺寸。
@@ -37,9 +37,7 @@ Windows 设置 → 应用 → Remy Asset Copilot → 卸载。
 
 常见问题
 Rhino 已打开：在它的命令行输入 AssetCopilot，不要重复拖入 RHP。
-缺少 .NET：修复 Rhino 安装。Rhino 8.0–8.11 需要 .NET 7；8.12+ 可用 .NET 7/8。
-通过安装器创建的启动入口会自动选用兼容运行时，不会改变 Rhino 全局设置。
-本版使用 .NET Core 模式；若 Rhino 已在 .NET Framework 模式运行，请保存并退出后使用 Remy 启动入口。
+运行时：兼容 Rhino 现有的 Framework/Core 模式，不修改全局设置。若 Rhino 本身无法启动，请修复 Rhino 安装。
 缺少 Rhino：从 https://www.rhino3d.com/download/ 安装/更新 Rhino 8。
 图片尺寸识别缺失：重新运行 Full 安装包；文字估算与手动尺寸仍可使用。
 首次启动预览需要 Rhino 所用的 Microsoft Edge WebView2 Runtime。

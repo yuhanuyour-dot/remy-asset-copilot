@@ -40,7 +40,7 @@ public static class SizeInferenceRules
     public static SizeEstimate Visual(IReadOnlyList<(string Id,double Score)> ranked,string hash)
     {
         var sorted=ranked.OrderByDescending(x=>x.Score).ToArray();
-        if(sorted.Length<2||sorted.Any(x=>!double.IsFinite(x.Score)||x.Score<0||x.Score>1))throw new InvalidOperationException("图像识别结果无效，请重新添加图片。");
+        if(sorted.Length<2||sorted.Any(x=>!Compat.IsFinite(x.Score)||x.Score<0||x.Score>1))throw new InvalidOperationException("图像识别结果无效，请重新添加图片。");
         var first=sorted[0];double margin=first.Score-sorted[1].Score;
         if(first.Id.StartsWith("unknown")||!Sizing.Presets.Any(p=>p.Id==first.Id)||first.Score<.30||margin<.05)
             throw new ArgumentException("暂时无法可靠判断图中的目标。请在描述框补充物体名称，或改用手动尺寸。");
@@ -69,7 +69,7 @@ public sealed class LocalSizeInference : IDisposable
         if(string.IsNullOrWhiteSpace(image)||!File.Exists(image))throw new ArgumentException("添加图片或描述目标物体后，会自动估算尺寸；本地 GLB 可在描述框补充物体名称。");
         var file=new FileInfo(image);if(file.Length==0||file.Length>20*1024*1024)throw new ArgumentException("尺寸识别图片需为不超过 20 MB 的 JPG / PNG。");
         // Async hashing also validates the actual source contents, independent of the attachment name.
-        byte[] bytes=await File.ReadAllBytesAsync(image,ct);string hash=Convert.ToHexString(SHA256.HashData(bytes));
+        byte[] bytes=await Compat.ReadAllBytesAsync(image!,ct);string hash=Compat.HashHex(bytes);
         Task<SizeEstimate> task;
         lock(cache)
         {
@@ -88,12 +88,12 @@ public sealed class LocalSizeInference : IDisposable
             // In Rhino AppContext.BaseDirectory is Rhino/System, not the plugin directory.
             worker=Path.Combine(Path.GetDirectoryName(typeof(LocalSizeInference).Assembly.Location)!,"tools","size-inference.mjs");
             if(!File.Exists(node)||!File.Exists(worker)||!File.Exists(Path.Combine(Runtime,"model","onnx","model_quantized.onnx")))throw new InvalidOperationException("本地图片识别组件缺失，请运行完整版安装程序并勾选图片尺寸识别；也可先用文字描述估算。");
-            Directory.CreateDirectory(AssetStore.Work);await File.WriteAllBytesAsync(snapshot,bytes,ct);
-            var start=new ProcessStartInfo(node){UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true,WorkingDirectory=Runtime,StandardInputEncoding=new UTF8Encoding(false)};
-            start.ArgumentList.Add(worker);start.ArgumentList.Add(Runtime);start.ArgumentList.Add(AssetStore.Work);start.Environment["TEMP"]=AssetStore.Work;start.Environment["TMP"]=AssetStore.Work;
+            Directory.CreateDirectory(AssetStore.Work);await Compat.WriteAllBytesAsync(snapshot,bytes,ct);
+            var start=new ProcessStartInfo(node){UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true,WorkingDirectory=Runtime};
+            Compat.SetArguments(start,worker,Runtime,AssetStore.Work);start.EnvironmentVariables["TEMP"]=AssetStore.Work;start.EnvironmentVariables["TMP"]=AssetStore.Work;
             using var process=Process.Start(start)??throw new InvalidOperationException("无法启动本地图像识别。");
             using var timeout=CancellationTokenSource.CreateLinkedTokenSource(ct);timeout.CancelAfter(TimeSpan.FromSeconds(90));
-            using var kill=timeout.Token.Register(()=>{try{if(!process.HasExited)process.Kill(true);}catch{}});
+            using var kill=timeout.Token.Register(()=>{try{if(!process.HasExited)process.Kill();}catch{}});
             var labels=Labels;
             var output=process.StandardOutput.ReadToEndAsync();var error=process.StandardError.ReadToEndAsync();
             await process.StandardInput.WriteAsync(JsonSerializer.Serialize(new{image=snapshot,labels=labels.Select(x=>x.Label)}));process.StandardInput.Close();

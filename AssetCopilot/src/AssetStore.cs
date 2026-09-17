@@ -36,8 +36,8 @@ public static class AssetStore
     public static void Initialize() { Directory.CreateDirectory(Root); Directory.CreateDirectory(Work); Directory.CreateDirectory(Path.Combine(Root,"models")); }
     public static string ValidateFolder(string value)
     {
-        if (string.IsNullOrWhiteSpace(value) || !Path.IsPathFullyQualified(value)) throw new ArgumentException("请选择完整的模型保存路径。");
-        var path = Path.TrimEndingDirectorySeparator(Path.GetFullPath(value));
+        if (string.IsNullOrWhiteSpace(value) || !Compat.IsPathFullyQualified(value)) throw new ArgumentException("请选择完整的模型保存路径。");
+        var path = Compat.TrimEndingDirectorySeparator(Path.GetFullPath(value));
         return path;
     }
     public static string SaveRoot()
@@ -59,12 +59,12 @@ public static class AssetStore
     public static AssetRecord Create(string root, string document, string identity, string source, string prompt, GenerationOptions? options)
     {
         root=ValidateFolder(root); Directory.CreateDirectory(root);
-        var hash=Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(identity)))[..8];
+        var hash=Compat.HashHex(Encoding.UTF8.GetBytes(identity))[..8];
         var folder=Path.Combine(root,Slug(Path.GetFileNameWithoutExtension(document))+"_"+hash,DateTime.Now.ToString("yyyyMMdd_HHmmss")+"_"+Guid.NewGuid().ToString("N")[..6]);
         Directory.CreateDirectory(folder); Directory.CreateDirectory(Path.Combine(folder,"textures"));
         var r=new AssetRecord {Folder=folder,Document=document,Source=source,Prompt=prompt,Model=options?.Model??"local",RequestedFaces=options?.Faces??0}; Save(r); return r;
     }
-    public static void WriteJson<T>(string path,T value) { File.WriteAllText(path+".tmp",JsonSerializer.Serialize(value,Json));File.Move(path+".tmp",path,true); }
+    public static void WriteJson<T>(string path,T value) { File.WriteAllText(path+".tmp",JsonSerializer.Serialize(value,Json));Compat.ReplaceFile(path+".tmp",path); }
     public static void Save(AssetRecord record) { WriteJson(Path.Combine(record.Folder,"asset.json"),record);WriteJson(LastRecord,record); }
     public static AssetRecord? Restore()
     {

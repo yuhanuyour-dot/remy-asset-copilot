@@ -1,60 +1,98 @@
 # Remy Asset Copilot
 
-把图片和文字描述转化为可放入 Rhino 场景的 3D 资产。
+Turn images and text into scene-ready 3D assets directly inside Rhino.
 
-**0.5.1 Beta · Windows 通用安装版**。支持 Windows 10/11 x64、Rhino 8.0 起的 Rhino 8 系列。Rhino 8.0–8.11 使用 .NET 7，8.12+ 可使用 .NET 7 / 8；启动入口自动选择已安装的兼容运行时。已在 Rhino 8.35 上分别验证 .NET 7 和 .NET 8；更早宿主版本仍需外部试装；不支持 macOS。
+**Version 0.5.2 Beta · Windows installer**
 
-## 下载安装
+Install Remy, open Rhino normally, and run `AssetCopilot` in the command line. No dedicated launcher or manual .NET runtime switching is required.
 
-在本仓库 **Releases** 中下载安装程序。`Code → Download ZIP` 仅提供源码，不能代替安装包。
+[Download 0.5.2 Beta](https://github.com/yuhanuyour-dot/remy-asset-copilot/releases/tag/v0.5.2) · [All releases](https://github.com/yuhanuyour-dot/remy-asset-copilot/releases)
 
-| 文件 | 用途 |
+## Features
+
+- Generate assets from text, an uploaded or pasted image, or an image with a text description.
+- Import local GLB files, including supported compressed models.
+- Preview PBR materials and place models directly into a Rhino scene.
+- Choose manual dimensions, estimated real-world dimensions, or a selected reference face, with conversion to Rhino document units.
+- Switch between full and compact windows while retaining input and task state.
+- Save models, textures, and task records locally, and resume checking previously submitted generation tasks.
+
+Real-world dimensions are estimates, not measurements from a photograph. Image-based estimation uses a local CLIP model and size rules; text-based estimation uses object descriptions and explicit dimensions.
+
+## Download
+
+Open the **0.5.2 Beta** release and expand **Assets**. Choose an installer:
+
+| File | Use |
 | --- | --- |
-| `RemyAssetCopilot-Setup-0.5.1-Full.exe` | 首次安装推荐；含可选的本地图片尺寸识别 |
-| `RemyAssetCopilot-Setup-0.5.1-Standard.exe` | 体积较小；支持生成和导入，不含本地图片尺寸识别模型 |
-| `RemyAssetCopilot-Setup-0.5.1-Update.exe` | 仅更新已经安装的 0.5.0 通用版；不能用于首次安装或 0.4.x 迁移 |
+| `RemyAssetCopilot-Setup-0.5.2-Full.exe` | Recommended for first-time installation. Includes the optional local image-based size estimation component. |
+| `RemyAssetCopilot-Setup-0.5.2-Standard.exe` | Smaller installer without the local image-based size estimation model. Supports generation, GLB import, and the other sizing methods. |
+| `RemyAssetCopilot-Setup-0.5.2-Update.exe` | Updates an existing 0.5.0 or newer universal installation. Not suitable for first-time installation or migration from 0.4.x. |
+| `SHA256SUMS-0.5.2.txt` | SHA-256 checksums for verifying the installers. |
 
-1. 保存项目并退出全部 Rhino。
-2. 双击安装程序，选择程序目录、Rhino.exe 和数据目录。任何本机磁盘均可，不要求 D 盘。
-3. 从开始菜单打开 **Remy Asset Copilot**；也可在 Rhino 中输入 `AssetCopilot`。
-4. 新建或打开 Rhino 文档。在插件中填写自己的 Tripo API Key 后即可生成；需要可用的 API 额度。
-5. 也可以用“+ → 本地 GLB”先测试预览、缩放和场景放置。
+The **Code → Download ZIP** option and automatically generated **Source code** archives contain source files, not an installer. Because 0.5.2 is a pre-release, an older release may still carry GitHub's **Latest** label; select 0.5.2 explicitly.
 
-不需要自行安装 Node.js、Python 或开发工具。安装器默认仅为当前 Windows 用户安装，无需管理员权限。升级会保留原数据目录；卸载不删除模型、贴图、设置和工作缓存。原 0.4.x 用户选择原安装目录进行迁移即可。
+## Install and Run
 
-当前安装包未进行代码签名。已完成本机安装/更新/卸载与中文路径测试，仍建议在另一台 Windows 机器上试装后正式推广。若 Releases 尚无附件，表示安装包还未上传。
+1. Save your work and close all Rhino windows.
+2. Download and run the appropriate installer.
+3. Confirm your Rhino executable, program directory, and data directory. Any supported local drive can be used; a D: drive is not required.
+4. Complete installation and open Rhino normally.
+5. Create or open a document, type `AssetCopilot` without spaces, and press Enter.
+6. Enter your own **Tripo API key** in the plugin to generate models. Your API account needs available credits.
 
-## 功能
+To test without spending API credits, use the **+** menu to import a local GLB. A sample is included at `AssetCopilot\sample\demo-chair.glb` inside the installation directory.
 
-- 统一输入框：纯文字、上传/粘贴图片、图片加文字、本地 GLB。
-- Tripo API 生成、PBR 材质预览、压缩 GLB 解码、插入 Rhino 场景。
-- 手动尺寸、现实尺寸估算、参考面三种尺寸方式，结合 Rhino 文档单位进行缩放。
-- 完整窗口/紧凑窗口切换，保留输入和任务状态；Remy 动画与加载动效。
-- 模型、贴图及任务本地保存，支持恢复查询已提交任务。
+The installer includes the required Node.js component. End users do not need Python, a .NET SDK, or development tools. Installation is per Windows user and normally requires no administrator privileges.
 
-现实尺寸是估算：图片通过本地 CLIP 识别，文字通过目标词和显式尺寸解析，结合尺寸规则推断，并非照片测量。图片加文字生成可能涉及图像处理与 3D 生成两步，按 Tripo API 规则计费。
+For an existing installation, retain the same program directory when upgrading. The installer preserves the existing data location. Use Standard or Full when migrating from 0.4.x. Uninstalling retains models, textures, settings, and working data.
 
-## 文件位置
+## Compatibility and Beta Status
 
-默认程序：`%LOCALAPPDATA%\Programs\RemyAssetCopilot`。
+- **Platform:** Windows 10/11, x64.
+- **Target host:** Rhino 8.0 and subsequent Rhino 8.x releases, built against the Rhino 8.0 SDK.
+- **Runtime modes:** .NET Framework, .NET 7, and .NET 8.
+- **Verified host:** Rhino 8.35; 161 interface, material, sizing, and placement checks passed in each runtime mode. The installed plugin also passed direct `AssetCopilot` command-launch checks in all three modes.
+- **Pending:** Testing on the original Rhino 8.0 host and independent clean-machine validation.
+- **Not covered:** macOS, Rhino 7, and Rhino 9.
 
-默认数据：`%LOCALAPPDATA%\RemyAssetCopilot\Data`。安装时可改到 D/E 等本机磁盘，之后也能在插件中单独修改模型保存目录。`remy-install.ini` 记录本机路径，不提交到 Git。
+Version 0.5.2 fixes the .NET Framework initialization failure in 0.5.1. Use the 0.5.2 installer for the normal Rhino command workflow.
 
-源代码和可再分发资源位于 `AssetCopilot/src`、`viewer`、`tools` 和 `sample`。安装器源码与构建说明见 [installer/README.md](installer/README.md)。
+This is a beta release. The installer is not code-signed, so Windows or your browser may display a reputation warning.
 
-构建插件：安装 .NET 8 SDK 后运行 `AssetCopilot/build.cmd`。首次构建从 NuGet 获取固定版本的 Rhino 8.0 SDK 与 WebView2 SDK，不需要本机 Rhino 开发引用。插件目标为 .NET 7，运行时兼容 .NET 8。完整安装包的构建还需要 runtime 组件，详见安装器文档。
+## API and Local Data
 
-## GitHub 发布
+Online generation uses your own Tripo API account. The key is used within the current plugin window; do not include it in source code, screenshots, or shared files. Image-plus-text generation may involve both image processing and 3D generation, with charges determined by the Tripo API.
 
-此仓库不包含个人图片、生成模型、API Key、任务记录、缓存、编译结果和大体积运行库。
+Default locations:
 
-1. 将本文件夹内源码提交到仓库。
-2. 创建 Release，标签建议 `v0.5.1`，标记为预发行版。
-3. 在 Release 附件中上传 Full、Standard、Update 三个 EXE 与 `SHA256SUMS-0.5.1.txt`；不要把 EXE 放入源码目录提交。
-4. 发布说明可使用 `RELEASE_NOTES.md`。
+| Content | Location |
+| --- | --- |
+| Program | `%LOCALAPPDATA%\Programs\RemyAssetCopilot` |
+| Models, settings, and working data | `%LOCALAPPDATA%\RemyAssetCopilot\Data` |
 
-API Key 只在插件当前窗口中使用，不要写进源码或截图。
+Both locations can be selected during installation. The model save folder can also be changed in the plugin. The local `remy-install.ini` records machine-specific paths and should not be committed to Git.
 
-## 许可
+## Build from Source
 
-第三方说明见 [THIRD-PARTY-NOTICES.md](AssetCopilot/THIRD-PARTY-NOTICES.md)。项目尚未指定代码许可证；本次没有替作者选择开源许可证。Remy Logo 与视频素材独立于第三方代码许可。
+Install the **.NET 8 SDK** on Windows, then run:
+
+```bat
+AssetCopilot\build.cmd
+```
+
+The first build restores pinned Rhino 8.0 and WebView2 SDK packages from NuGet; it does not require local Rhino development references. The source supports `net48` and `net7.0-windows`. The installer distributes the `net48` compatibility assembly tested in all three Rhino runtime modes.
+
+Building the Windows installers additionally requires Python, Inno Setup, and the runtime components described in [the installer build guide](installer/README.md) (currently in Chinese).
+
+Source code and redistributable resources are in `AssetCopilot/src`, `AssetCopilot/viewer`, `AssetCopilot/tools`, and `AssetCopilot/sample`. Personal images, generated assets, API keys, task records, build caches, and large runtime components are excluded from the source export.
+
+## Publishing Updates
+
+Commit the matching source code and README to the repository before creating a release tag. For this version, use `v0.5.2` and mark the release as a pre-release. Attach the Full, Standard, and Update installers and `SHA256SUMS-0.5.2.txt` to the release rather than committing binaries to the source tree.
+
+Publishing a release does not automatically update the README or source files on the default branch. See [RELEASE_NOTES.md](RELEASE_NOTES.md) for the release description.
+
+## License and Credits
+
+See [third-party notices](AssetCopilot/THIRD-PARTY-NOTICES.md) for component licenses. No project-wide source code license has been selected yet. The Remy logo and supplied animation assets are separate from the third-party code licenses.

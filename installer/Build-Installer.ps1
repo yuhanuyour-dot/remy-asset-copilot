@@ -16,7 +16,7 @@ if(-not $RuntimeSource){$RuntimeSource=Join-Path $root 'runtime'}
 if(-not(Test-Path -LiteralPath $Iscc)){throw 'Install Inno Setup 6.7.3, or pass -Iscc with the path to ISCC.exe.'}
 if(-not(Test-Path -LiteralPath (Join-Path $RuntimeSource 'node.exe'))){throw 'Pass -RuntimeSource with the runtime folder from a Full installation.'}
 if($Variants -contains 'Full' -and -not(Test-Path -LiteralPath (Join-Path $RuntimeSource 'vision/model/onnx/model_quantized.onnx'))){throw 'Full requires the local image-size model in RuntimeSource/vision.'}
-& dotnet build (Join-Path $root 'AssetCopilot/AssetCopilot.csproj') -c Release -o (Join-Path $root 'AssetCopilot/dist-next') --nologo
+& dotnet build (Join-Path $root 'AssetCopilot/AssetCopilot.csproj') -c Release -f net48 -o (Join-Path $root 'AssetCopilot/dist-universal') --nologo
 if($LASTEXITCODE -ne 0){throw 'Plugin build failed'}
 $payload=Join-Path $root ('work/installer-payload-'+(Get-Date -Format 'yyyyMMdd-HHmmss-fff'))
 & $Python (Join-Path $PSScriptRoot 'stage.py') --root $root --output $payload --runtime $RuntimeSource
@@ -25,4 +25,4 @@ foreach($variant in $Variants){
     & $Iscc /Q "/DPayload=$payload" "/DVariant=$variant" (Join-Path $PSScriptRoot 'RemyAssetCopilot.iss')
     if($LASTEXITCODE -ne 0){throw "Installer build failed: $variant"}
 }
-Get-ChildItem -LiteralPath (Join-Path $root 'releases') -Filter 'RemyAssetCopilot-Setup-0.5.1-*.exe' | ForEach-Object {"$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)"} | Set-Content -LiteralPath (Join-Path $root 'releases/SHA256SUMS-0.5.1.txt') -Encoding ascii
+Get-ChildItem -LiteralPath (Join-Path $root 'releases') -Filter 'RemyAssetCopilot-Setup-0.5.2-*.exe' | Where-Object { $_.Name -notlike '*-QA.exe' } | ForEach-Object {"$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)"} | Set-Content -LiteralPath (Join-Path $root 'releases/SHA256SUMS-0.5.2.txt') -Encoding ascii

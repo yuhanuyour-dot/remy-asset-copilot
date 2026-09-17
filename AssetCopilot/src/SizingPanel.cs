@@ -61,7 +61,7 @@ public sealed class SizingPanel : StackPanel
     }
     void Notify(){lastDecision=null;adjust.IsEnabled=false;if(!loading)Changed?.Invoke();}
     void ShowMode(){manual.Visibility=Mode==SizeMode.Manual?Visibility.Visible:Visibility.Collapsed;automatic.Visibility=Mode==SizeMode.Manual?Visibility.Collapsed:Visibility.Visible;referencePanel.Visibility=Mode==SizeMode.ReferenceFace?Visibility.Visible:Visibility.Collapsed;adjust.Visibility=Mode==SizeMode.Manual?Visibility.Collapsed:Visibility.Visible;}
-    public void SelectMode(SizeMode value){if(!Enum.IsDefined(value))throw new ArgumentException("无效尺寸方式。");choices[(int)value].IsChecked=true;}
+    public void SelectMode(SizeMode value){if(!Enum.IsDefined(typeof(SizeMode),value))throw new ArgumentException("无效尺寸方式。");choices[(int)value].IsChecked=true;}
     public void SetEstimate(SizeEstimate? value){estimate=value;lastDecision=null;adjust.IsEnabled=false;}
     public void ShowPending(){SetEstimate(null);ShowHint("正在分析图片与描述，估算现实尺寸…");}
     public void ShowHint(string message){summary.Text=message;summary.Foreground=UiTheme.Muted;summary.Visibility=Mode==SizeMode.Manual?Visibility.Collapsed:Visibility.Visible;lastDecision=null;adjust.IsEnabled=false;}
@@ -69,8 +69,8 @@ public sealed class SizingPanel : StackPanel
     public SizingSettings Capture()
     {
         bool sizeOk=double.TryParse(dimension.Text,NumberStyles.Float,CultureInfo.CurrentCulture,out double size),ratioOk=float.TryParse(percentage.Text,NumberStyles.Float,CultureInfo.CurrentCulture,out float ratio);
-        if(Mode==SizeMode.Manual&&(!sizeOk||!ratioOk||!double.IsFinite(size)||!float.IsFinite(ratio)))throw new ArgumentException("尺寸和比例必须是有效数字。");
-        if(Mode!=SizeMode.Manual){if(!double.IsFinite(size)||size<=0||size>1e9)size=600;if(!float.IsFinite(ratio)||ratio<=0||ratio>10000)ratio=100;}
+        if(Mode==SizeMode.Manual&&(!sizeOk||!ratioOk||!Compat.IsFinite(size)||!Compat.IsFinite(ratio)))throw new ArgumentException("尺寸和比例必须是有效数字。");
+        if(Mode!=SizeMode.Manual){if(!Compat.IsFinite(size)||size<=0||size>1e9)size=600;if(!Compat.IsFinite(ratio)||ratio<=0||ratio>10000)ratio=100;}
         return new SizingSettings{Mode=Mode,Category="auto",ManualAxis=axis.SelectedIndex,ManualUnit=units.SelectedIndex,ManualSize=sizeOk?size:600,Percent=ratioOk?ratio:100,Reference=reference};
     }
     public void Restore(SizingSettings? settings)
@@ -79,8 +79,8 @@ public sealed class SizingPanel : StackPanel
         try
         {
             dimension.Text=settings.ManualSize.ToString(CultureInfo.CurrentCulture);percentage.Text=settings.Percent.ToString(CultureInfo.CurrentCulture);
-            axis.SelectedIndex=Math.Clamp(settings.ManualAxis,0,2);units.SelectedIndex=Math.Clamp(settings.ManualUnit,0,4);estimate=null;reference=settings.Reference;
-            SelectMode(Enum.IsDefined(settings.Mode)?settings.Mode:SizeMode.Manual);
+            axis.SelectedIndex=Compat.Clamp(settings.ManualAxis,0,2);units.SelectedIndex=Compat.Clamp(settings.ManualUnit,0,4);estimate=null;reference=settings.Reference;
+            SelectMode(Enum.IsDefined(typeof(SizeMode),settings.Mode)?settings.Mode:SizeMode.Manual);
         }
         finally{loading=false;}
     }
@@ -100,6 +100,6 @@ public sealed class SizingPanel : StackPanel
     public void UseManual()
     {
         if(lastDecision==null)return;var selected=lastDecision;
-        dimension.Text=(selected.TargetMeters/Sizing.UnitMeters[Math.Clamp(units.SelectedIndex,0,4)]).ToString("0.######",CultureInfo.CurrentCulture);percentage.Text="100";axis.SelectedIndex=selected.Axis;SelectMode(SizeMode.Manual);
+        dimension.Text=(selected.TargetMeters/Sizing.UnitMeters[Compat.Clamp(units.SelectedIndex,0,4)]).ToString("0.######",CultureInfo.CurrentCulture);percentage.Text="100";axis.SelectedIndex=selected.Axis;SelectMode(SizeMode.Manual);
     }
 }
