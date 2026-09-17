@@ -1,0 +1,49 @@
+Remy Asset Copilot 0.5.1 Beta · Windows 安装版
+
+适用：Windows 10/11 x64；Rhino 8.0 起的 Rhino 8；兼容的 .NET 7 或 .NET 8 桌面运行时 x64。
+当前实测：Windows、Rhino 8.35、.NET 7 / .NET 8。早期 Rhino 8 宿主仍需外部试装。此版本不支持 macOS。
+
+安装
+1. 保存项目并退出全部 Rhino 窗口。
+2. 运行 Setup 安装程序，确认检测到的 Rhino.exe。
+3. 选择程序目录及数据目录；不需要 D 盘，也不需要安装 Node.js。
+4. 如需从图片自动估算现实尺寸，使用 Full 完整版并勾选本地图片识别组件。
+5. 安装后从开始菜单打开 Remy Asset Copilot，或在 Rhino 输入 AssetCopilot。
+
+安装包选择
+Standard：插件、GLB 解码运行环境、材质预览、文字/图片生成、手动/文字估算/参考面尺寸。
+Full：包含 Standard，以及离线图片尺寸估算模型。
+Update：仅用于已安装 0.5.0 或更新通用版；不含 Node.js 或识别模型。第一次安装用 Standard/Full。
+Standard 更新已有 Full 时会保留原识别组件。安装器不会自动下载其他组件。
+
+使用
+在线生成需要你自己的 Tripo API Key 和 API 额度；API Key 只在当前窗口内使用。
+先使用“+ → 本地 GLB”测试模型预览、尺寸及放置，可不调用 API。
+现实尺寸是依据图像类别/文字和尺寸规则的估算，不是照片实测尺寸。
+在插件“模型与贴图保存位置”可修改模型目录。
+
+文件位置与升级
+默认程序：当前用户 LocalAppData\Programs\RemyAssetCopilot。
+默认数据：当前用户 LocalAppData\RemyAssetCopilot\Data。
+安装时可以改成 D/E 等本机磁盘。原 0.4.x 注册目录会自动作为迁移候选位置。
+若在原 D:\assetcopilot 安装，沿用原 models、settings.json、last-asset.json。
+启动快捷方式不会重新安装插件；更新请重新运行新版 Setup。
+同一 Windows 用户只注册一套 Remy 插件，安装新位置前请卸载旧通用版。
+
+卸载
+Windows 设置 → 应用 → Remy Asset Copilot → 卸载。
+先关闭 Rhino。卸载仅移除程序和当前安装对应的插件注册，不删除模型、贴图、设置或工作缓存。
+如果需要清理数据，请自行确认并备份数据目录。
+
+常见问题
+Rhino 已打开：在它的命令行输入 AssetCopilot，不要重复拖入 RHP。
+缺少 .NET：修复 Rhino 安装。Rhino 8.0–8.11 需要 .NET 7；8.12+ 可用 .NET 7/8。
+通过安装器创建的启动入口会自动选用兼容运行时，不会改变 Rhino 全局设置。
+本版使用 .NET Core 模式；若 Rhino 已在 .NET Framework 模式运行，请保存并退出后使用 Remy 启动入口。
+缺少 Rhino：从 https://www.rhino3d.com/download/ 安装/更新 Rhino 8。
+图片尺寸识别缺失：重新运行 Full 安装包；文字估算与手动尺寸仍可使用。
+首次启动预览需要 Rhino 所用的 Microsoft Edge WebView2 Runtime。
+
+这是尚未购买代码签名证书的 Beta 安装包。发布者应在公开分发前进行干净机器测试和代码签名。
+不要把 API Key、个人模型或 settings.json 上传到 GitHub。
+第三方许可见 AssetCopilot/THIRD-PARTY-NOTICES.md、runtime 及 viewer 中的许可文件。

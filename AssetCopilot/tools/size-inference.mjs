@@ -1,0 +1,20 @@
+// Local-only CLIP inference. No API key or network access is used by this worker.
+import fs from 'node:fs';
+import { pathToFileURL } from 'node:url';
+import path from 'node:path';
+const runtime = path.resolve(process.argv[2] || process.cwd());
+const cache = path.resolve(process.argv[3] || process.env.TEMP || process.cwd());
+const { pipeline, env } = await import(pathToFileURL(runtime + '/node_modules/@huggingface/transformers/dist/transformers.node.mjs'));
+env.allowRemoteModels = false;
+env.allowLocalModels = true;
+env.useBrowserCache = false;
+env.cacheDir = path.join(cache, 'vision-cache');
+env.backends.onnx.wasm.numThreads = 4;
+const chunks=[];
+for await(const chunk of process.stdin) chunks.push(chunk);
+const input=JSON.parse(Buffer.concat(chunks).toString('utf8'));
+if(!Array.isArray(input.labels)||!input.labels.length||input.labels.length>100||!fs.existsSync(input.image)) throw new Error('Invalid local inference input');
+const classifier=await pipeline('zero-shot-image-classification', runtime + '/model', {dtype:'q8',device:'cpu',session_options:{intraOpNumThreads:4,interOpNumThreads:1}});
+const results=await classifier(input.image, input.labels, {hypothesis_template:'A photo of {}.'});
+process.stdout.write(JSON.stringify(results));
+await classifier.dispose();

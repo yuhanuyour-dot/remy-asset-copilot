@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <UseWindowsForms>true</UseWindowsForms>
+    <LangVersion>12.0</LangVersion>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>AssetCopilot</AssemblyName>
+    <Version>0.5.1</Version>
+
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="src\*.cs" />
+    <Content Include="tools\*" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Rhino 8.0 SDK is published as net48; its API surface is intentionally consumed from .NET 7. -->
+    <PackageReference Include="RhinoCommon" Version="8.0.23304.9001" IncludeAssets="compile" PrivateAssets="all" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1938.49" />
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+    <Content Include="viewer/**/*" Link="viewer/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="PackagePlugin" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(TargetDir)AssetCopilot.rhp" />
+    <Delete Files="$(TargetPath)" />
+  </Target>
+</Project>
