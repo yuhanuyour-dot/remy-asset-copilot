@@ -75,7 +75,7 @@ public sealed class PbrPreview : WebView2
     [DllImport("gdi32.dll")] static extern bool DeleteObject(IntPtr handle);
     void StartupFailed()
     {
-        if(disposed)return;SurfaceReady=false;Visibility=Visibility.Hidden;StartupError="请关闭插件后重新打开。";StartupStateChanged?.Invoke();
+        if(disposed)return;SurfaceReady=false;Visibility=Visibility.Hidden;StartupError="Close and reopen the plugin.";StartupStateChanged?.Invoke();
     }
     async Task Initialize()
     {
@@ -84,7 +84,7 @@ public sealed class PbrPreview : WebView2
         var env=await CoreWebView2Environment.CreateAsync(null,Path.Combine(AssetStore.Work,"webview"));
         await EnsureCoreWebView2Async(env);
         if(disposed)return;
-        CoreWebView2.ProcessFailed+=(_,_)=>{StartupFailed();pending?.TrySetException(new InvalidOperationException("预览进程已停止，请重新打开插件。"));};
+        CoreWebView2.ProcessFailed+=(_,_)=>{StartupFailed();pending?.TrySetException(new InvalidOperationException("The preview process stopped. Reopen the plugin."));};
         CoreWebView2.Settings.AreDefaultContextMenusEnabled=false;
         CoreWebView2.Settings.AreDevToolsEnabled=false;
         CoreWebView2.Settings.IsStatusBarEnabled=false;
@@ -106,10 +106,10 @@ public sealed class PbrPreview : WebView2
             using var json=JsonDocument.Parse(e.WebMessageAsJson);var root=json.RootElement;var type=root.GetProperty("type").GetString();
             if(type=="ready"){SurfaceReady=true;UpdateSurfaceVisibility();ready.TrySetResult(true);PublishStatus();StartupStateChanged?.Invoke();return;}
             if(type=="pick-image"){if(!interactionBlocked)ImageRequested?.Invoke();return;}
-            if(!root.TryGetProperty("id",out var id)){ready.TrySetException(new InvalidOperationException("PBR 预览初始化失败。"));return;}
+            if(!root.TryGetProperty("id",out var id)){ready.TrySetException(new InvalidOperationException("PBR preview initialization failed."));return;}
             if(id.GetString()!=request)return;
             if(type=="loaded"){Statistics=root.GetProperty("stats").GetRawText();pending?.TrySetResult(true);}
-            else if(type=="error")pending?.TrySetException(new InvalidOperationException("PBR 预览失败："+root.GetProperty("message").GetString()));
+            else if(type=="error")pending?.TrySetException(new InvalidOperationException("PBR preview failed: "+root.GetProperty("message").GetString()));
         };
         CoreWebView2.Navigate("https://copilot.local/index.html");
         await ready.Task.WaitAsync(TimeSpan.FromSeconds(45));
@@ -133,7 +133,7 @@ public sealed class PbrPreview : WebView2
     }
     public void SetBusy(bool value)
     {
-        if(value&&!interactionBlocked){progressText="准备中…";statusPersistent=false;}
+        if(value&&!interactionBlocked){progressText="Preparing…";statusPersistent=false;}
         interactionBlocked=value;PublishStatus();
     }
     public void ReportStatus(string text,bool persistent=false){progressText=text;statusPersistent=persistent;PublishStatus();}

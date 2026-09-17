@@ -6,8 +6,8 @@ using System.Windows.Markup;
 namespace AssetCopilot;
 public sealed partial class CopilotWindow
 {
-    readonly TextBlock startupTitle=new(){Text="添加参考图片",FontSize=15,Foreground=new SolidColorBrush(Color.FromRgb(66,66,73)),HorizontalAlignment=HorizontalAlignment.Center};
-    readonly TextBlock startupHint=new(){Text="点击上传，也可以在下方粘贴",FontSize=12,Foreground=UiTheme.Muted,Margin=new Thickness(0,7,0,0),HorizontalAlignment=HorizontalAlignment.Center,TextWrapping=TextWrapping.Wrap,TextAlignment=TextAlignment.Center};
+    readonly TextBlock startupTitle=new(){Text="Add reference image",FontSize=15,Foreground=new SolidColorBrush(Color.FromRgb(66,66,73)),HorizontalAlignment=HorizontalAlignment.Center};
+    readonly TextBlock startupHint=new(){Text="Click to upload, or paste below",FontSize=12,Foreground=UiTheme.Muted,Margin=new Thickness(0,7,0,0),HorizontalAlignment=HorizontalAlignment.Center,TextWrapping=TextWrapping.Wrap,TextAlignment=TextAlignment.Center};
     Button startupPlaceholder=null!;
     void InstallPreviewStartup()
     {
@@ -21,11 +21,11 @@ public sealed partial class CopilotWindow
 </Style>
 """);
         startupPlaceholder=new Button{Content=content,Style=style,Margin=new Thickness(0),Padding=new Thickness(0)};
-        AutomationProperties.SetName(startupPlaceholder,"添加参考图片");startupPlaceholder.Click+=(_,_)=>RequestPhoto();preview.Children.Add(startupPlaceholder);
+        AutomationProperties.SetName(startupPlaceholder,"Add reference image");startupPlaceholder.Click+=(_,_)=>RequestPhoto();preview.Children.Add(startupPlaceholder);
         viewport.StartupStateChanged+=()=>
         {
             startupPlaceholder.Visibility=viewport.SurfaceReady?Visibility.Collapsed:Visibility.Visible;
-            if(!string.IsNullOrEmpty(viewport.StartupError)){startupTitle.Text="预览暂时不可用";startupHint.Text=viewport.StartupError;startupPlaceholder.IsEnabled=false;}
+            if(!string.IsNullOrEmpty(viewport.StartupError)){startupTitle.Text="Preview unavailable";startupHint.Text=viewport.StartupError;startupPlaceholder.IsEnabled=false;}
         };
     }
 }

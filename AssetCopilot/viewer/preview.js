@@ -27,10 +27,10 @@ function present(){
  const visible=blocked||status.persistent||!!localError;
  const animate=blocked&&!status.persistent&&!localError;
  label.style.display=visible?'flex':'none';
- loadingText.textContent=localError||(modelLoading?'正在载入 PBR 材质…':status.text)||'准备中…';
+ loadingText.textContent=localError||(modelLoading?'Loading PBR materials…':status.text)||'Preparing…';
  picker.style.display=current||blocked?'none':'flex';
- const idleNotice=/^(模型已|图片已就绪|准备中)/.test(status.text)?'':status.text;
- hint.textContent=visible?'':idleNotice||(current?'拖动旋转 · 滚轮缩放 · 点击添加图片':'');
+ const idleNotice=/^(Model (loaded|ready)|Image ready|Preparing)/.test(status.text)?'':status.text;
+ hint.textContent=visible?'':idleNotice||(current?'Drag to rotate · Scroll to zoom · Click to add an image':'');
  blocks.style.display=animate&&!videoFailed?'block':'none';fallback.style.display=animate&&videoFailed?'flex':'none';
  if(animate!==playing){
   playing=animate;
@@ -48,7 +48,7 @@ function clear(preserveStatus=false){
 }
 try {
  renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setClearColor('#f7f7f9',1);renderer.setSize(Math.max(1,innerWidth),Math.max(1,innerHeight));renderer.clear();renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;document.body.prepend(renderer.domElement);
- const canvas=renderer.domElement;canvas.id='scene';canvas.tabIndex=-1;canvas.setAttribute('role','button');canvas.setAttribute('aria-label','3D 预览，点击或按 Enter 添加图片，拖动旋转，滚轮缩放');
+ const canvas=renderer.domElement;canvas.id='scene';canvas.tabIndex=-1;canvas.setAttribute('role','button');canvas.setAttribute('aria-label','3D preview. Click or press Enter to add an image. Drag to rotate and scroll to zoom.');
  canvas.addEventListener('pointerdown',e=>{press=current&&e.button===0?{id:e.pointerId,x:e.clientX,y:e.clientY,time:performance.now(),moved:false}:null;});
  canvas.addEventListener('pointermove',e=>{if(press&&e.pointerId===press.id&&Math.hypot(e.clientX-press.x,e.clientY-press.y)>5)press.moved=true;});
  canvas.addEventListener('pointercancel',()=>press=null);
@@ -61,7 +61,7 @@ try {
  controls=new OrbitControls(camera,renderer.domElement);controls.enablePan=false;controls.enableDamping=true;controls.mouseButtons={LEFT:THREE.MOUSE.ROTATE,MIDDLE:THREE.MOUSE.DOLLY,RIGHT:THREE.MOUSE.ROTATE};controls.minDistance=.15;controls.maxDistance=15;
  new ResizeObserver(()=>{renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}).observe(document.body);
  renderer.setAnimationLoop(()=>{drawBlocks();if(!playing){controls.update();renderer.render(scene,camera);}});
- const manager=new THREE.LoadingManager();manager.setURLModifier(url=>{if(/^(blob:|data:|https:\/\/copilot\.local\/asset\.glb)/.test(url))return url;throw new Error('只支持模型内嵌资源');});
+ const manager=new THREE.LoadingManager();manager.setURLModifier(url=>{if(/^(blob:|data:|https:\/\/copilot\.local\/asset\.glb)/.test(url))return url;throw new Error('Only embedded model resources are supported');});
  let textureErrors=[];manager.onError=url=>textureErrors.push(url);
  const loader=new GLTFLoader(manager).setMeshoptDecoder(MeshoptDecoder);
  window.chrome.webview.addEventListener('message',async e=>{
@@ -71,15 +71,15 @@ try {
   clear(true);modelLoading=true;textureErrors=[];const revision=sequence;present();
   try{
    const gltf=await loader.loadAsync(m.url);if(revision!==sequence){dispose(gltf.scene);return;}
-   if(textureErrors.length){dispose(gltf.scene);throw new Error('有贴图未能载入，请重新载入模型');}
+   if(textureErrors.length){dispose(gltf.scene);throw new Error('Some textures could not be loaded. Load the model again.');}
    current=gltf.scene;current.rotation.x=Math.PI/2;current.updateMatrixWorld(true);
-   let box=new THREE.Box3().setFromObject(current),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3()),extent=Math.max(size.x,size.y,size.z);if(!Number.isFinite(extent)||extent<=0)throw new Error('模型没有有效尺寸');
+   let box=new THREE.Box3().setFromObject(current),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3()),extent=Math.max(size.x,size.y,size.z);if(!Number.isFinite(extent)||extent<=0)throw new Error('The model has no valid dimensions');
    const holder=new THREE.Group();holder.add(current);current.position.sub(center);holder.scale.setScalar(1/extent);current=holder;scene.add(current);
    controls.target.set(0,0,0);camera.position.set(1.45,-2,1.15);controls.update();
    const parts=[];current.traverse(o=>{if(o.isMesh)for(const m of(Array.isArray(o.material)?o.material:[o.material]))parts.push({material:m.type,base:!!m.map,metallic:!!m.metalnessMap,roughness:!!m.roughnessMap,normal:!!m.normalMap,offset:m.map?.offset.toArray(),repeat:m.map?.repeat.toArray(),wrap:m.map?[m.map.wrapS,m.map.wrapT]:null});});
    window.previewStats={parts,triangles:0,pbr:parts.every(p=>p.material==='MeshStandardMaterial'||p.material==='MeshPhysicalMaterial')};current.traverse(o=>{if(o.isMesh)window.previewStats.triangles+=(o.geometry.index?.count??o.geometry.attributes.position.count)/3;});
    renderer.render(scene,camera);modelLoading=false;canvas.tabIndex=0;present();send({type:'loaded',id:m.id,stats:window.previewStats});
-  }catch(error){if(revision!==sequence)return;modelLoading=false;localError='预览载入失败，请重新载入模型';present();send({type:'error',id:m.id,message:String(error.message)});}
+  }catch(error){if(revision!==sequence)return;modelLoading=false;localError='Preview failed to load. Load the model again.';present();send({type:'error',id:m.id,message:String(error.message)});}
  });
  present();renderer.render(scene,camera);window.previewFirstFrameReady=true;send({type:'ready'});
-}catch(error){modelLoading=false;localError='无法启动材质预览';present();send({type:'error',message:String(error.message)});}
+}catch(error){modelLoading=false;localError='Could not start the material preview';present();send({type:'error',message:String(error.message)});}

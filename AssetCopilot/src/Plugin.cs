@@ -25,7 +25,7 @@ public sealed class AssetCopilotDemoCommand : Command
     {
         var root=Path.GetDirectoryName(typeof(AssetCopilotPlugin).Assembly.Location)!;
         var sample=Path.GetFullPath(Path.Combine(root,"../sample/demo-chair.glb"));
-        if(!File.Exists(sample)){RhinoApp.WriteLine("样例文件未找到，请保留 dist 与 sample 文件夹的相对位置。");return Result.Failure;}
+        if(!File.Exists(sample)){RhinoApp.WriteLine("Sample file not found. Keep the dist and sample folders in their original relative locations.");return Result.Failure;}
         var window=new CopilotWindow(sample);new WindowInteropHelper(window).Owner=RhinoApp.MainWindowHandle();window.Show();return Result.Success;
     }
 }

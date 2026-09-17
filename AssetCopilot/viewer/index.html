@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'unsafe-inline'; img-src 'self' blob: data:; media-src 'self'; connect-src 'self' blob: data:; worker-src blob:;">
 <style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font:13px 'Microsoft YaHei UI',sans-serif;color:#6c6c74}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font:13px 'Segoe UI',sans-serif;color:#6c6c74}
 #scene{display:block;outline:none;border-radius:18px}#scene:focus-visible{outline:2px solid #6b6b76;outline-offset:-3px}
 #pick-image{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1px dashed transparent;border-radius:18px;background:#f7f7f9;cursor:pointer;font:inherit;color:#6c6c74}
 #pick-image:hover{background:#f0f0f4;border-color:#d0d0d8}#pick-image:focus-visible{outline:2px solid #6b6b76;outline-offset:-2px}#pick-image:disabled{cursor:wait;opacity:.5}
@@ -18,7 +18,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font:1
 </style>
 <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
 </head><body>
-<button id="pick-image" type="button" aria-label="添加参考图片"><span class="icon"><img src="./vendor/icons/image-square.svg" alt=""></span><strong>添加参考图片</strong><span>点击上传，也可以在下方粘贴</span></button>
+<button id="pick-image" type="button" aria-label="Add reference image"><span class="icon"><img src="./vendor/icons/image-square.svg" alt=""></span><strong>Add reference image</strong><span>Click to upload, or paste below</span></button>
 <div id="message" role="status" aria-live="polite"><canvas id="loading-blocks" width="165" height="125" aria-hidden="true"></canvas><div id="loading-fallback" aria-hidden="true"><i></i><i></i><i></i></div><span id="loading-text"></span></div>
 <video id="loading-video" src="./media/pixel_blocks.mp4" muted loop playsinline preload="auto" aria-hidden="true"></video>
 <div id="hint"></div><script type="module" src="./preview.js"></script></body></html>

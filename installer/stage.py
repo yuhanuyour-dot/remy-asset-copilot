@@ -33,7 +33,7 @@ for f in vision.rglob('*'):
     if '/bin/napi-v3/' in path and '/bin/napi-v3/win32/x64/' not in path: continue
     if '/cache/' in '/'+path or '__pycache__' in rel.parts: continue
     copy(f,out/'runtime/vision'/rel)
-copy(root/'installer/使用说明.txt',out/'使用说明.txt')
+copy(root/'installer/UserGuide.txt',out/'UserGuide.txt')
 manifest=[]
 for f in sorted(out.rglob('*')):
     if f.is_file(): manifest.append({'path':f.relative_to(out).as_posix(),'bytes':f.stat().st_size,'sha256':hashlib.sha256(f.read_bytes()).hexdigest()})

@@ -36,7 +36,7 @@ public static class AssetStore
     public static void Initialize() { Directory.CreateDirectory(Root); Directory.CreateDirectory(Work); Directory.CreateDirectory(Path.Combine(Root,"models")); }
     public static string ValidateFolder(string value)
     {
-        if (string.IsNullOrWhiteSpace(value) || !Compat.IsPathFullyQualified(value)) throw new ArgumentException("请选择完整的模型保存路径。");
+        if (string.IsNullOrWhiteSpace(value) || !Compat.IsPathFullyQualified(value)) throw new ArgumentException("Choose an absolute path for saving models.");
         var path = Compat.TrimEndingDirectorySeparator(Path.GetFullPath(value));
         return path;
     }

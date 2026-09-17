@@ -11,7 +11,7 @@ namespace AssetCopilot;
 public sealed partial class CopilotWindow
 {
     readonly TextBlock compactStatus=new(){Foreground=UiTheme.Muted,FontSize=10.5,TextTrimming=TextTrimming.CharacterEllipsis,VerticalAlignment=VerticalAlignment.Center};
-    readonly Button compactCancel=new(){Content="停止",FontSize=10.5,Padding=new Thickness(8,3,8,3),Margin=new Thickness(8,0,0,0)};
+    readonly Button compactCancel=new(){Content="Stop",FontSize=10.5,Padding=new Thickness(8,3,8,3),Margin=new Thickness(8,0,0,0)};
     readonly DockPanel compactFeedback=new(){Margin=new Thickness(8,6,8,0)};
     readonly TextBlock compactCaption=new(){Text="Remy",Foreground=UiTheme.Muted,FontWeight=FontWeights.Medium,FontSize=11,VerticalAlignment=VerticalAlignment.Center,Visibility=Visibility.Collapsed};
     readonly List<(UIElement Element,Visibility Visibility)> hiddenSections=new();
@@ -50,7 +50,7 @@ public sealed partial class CopilotWindow
     }
     void UpdateViewButton()
     {
-        string label=compactMode?"展开完整界面":"收起为输入小窗";
+        string label=compactMode?"Expand full window":"Collapse to compact window";
         toggleChevron.RenderTransform=new ScaleTransform(1,compactMode?-1:1);
         viewToggle.ToolTip=label+" · Ctrl+Shift+Space";AutomationProperties.SetName(viewToggle,label);
     }
@@ -68,7 +68,7 @@ public sealed partial class CopilotWindow
         compactFeedback.Children.Add(compactCancel);compactFeedback.Children.Add(compactStatus);
         modeRoot.Children.Insert(modeRoot.Children.IndexOf(bodyCard)+1,compactFeedback);
         AutomationProperties.SetLiveSetting(compactStatus,AutomationLiveSetting.Polite);
-        AutomationProperties.SetName(compactCancel,"停止当前任务等待");
+        AutomationProperties.SetName(compactCancel,"Stop waiting for the current task");
         // One persistent visual tree: the composer never changes parent or scroll host.
         var shell=new Grid();Content=null;shell.Children.Add(layout);
         viewToggle=ViewButton();Panel.SetZIndex(viewToggle,1);shell.Children.Add(viewToggle);Content=shell;

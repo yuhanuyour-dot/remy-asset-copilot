@@ -21,7 +21,7 @@ public static class GenerationWorkflow
         {
             if(string.IsNullOrEmpty(record.ImageTaskId))
             {
-                options.Validate();progress("1/2 · 上传参考图");var token=await client.Upload(record.ReferencePath,ct);
+                options.Validate();progress("1/2 · Uploading reference image");var token=await client.Upload(record.ReferencePath,ct);
                 ct.ThrowIfCancellationRequested();record.ImageTaskId=Uncertain;record.State="image-submitting";save(record);
                 record.ImageTaskId=await client.EditImage(token,record.Prompt,ct);record.State="image-generating";save(record);
             }
@@ -34,16 +34,16 @@ public static class GenerationWorkflow
         {
             options.Validate();bool text=record.Source=="text";string input=record.Prompt;
             options.Payload(text?input:"validate",text);
-            if(!text){progress(mixed?"2/2 · 准备生成模型":"正在上传图片");input=await client.Upload(mixed?Path.Combine(record.Folder,"processed-reference.png"):record.ReferencePath,ct);}
+            if(!text){progress(mixed?"2/2 · Preparing model generation":"Uploading image");input=await client.Upload(mixed?Path.Combine(record.Folder,"processed-reference.png"):record.ReferencePath,ct);}
             ct.ThrowIfCancellationRequested();record.TaskId=Uncertain;record.State="model-submitting";save(record);
             record.TaskId=await client.Generate(input,text,options,ct);record.State="generating";save(record);
         }
         RequireKnown(record.TaskId);
         var url=await client.Wait(record.TaskId,s=>progress((mixed?"2/2 · ":"")+s),ct);
-        progress("正在下载模型与贴图");await client.Download(url,record.Glb,ct);record.State="downloaded";save(record);
+        progress("Downloading model and textures");await client.Download(url,record.Glb,ct);record.State="downloaded";save(record);
     }
     static void RequireKnown(string id)
     {
-        if(id==Uncertain||string.IsNullOrWhiteSpace(id))throw new InvalidOperationException("上次提交的结果尚未确认。请在 Tripo 控制台查到该阶段的任务编号，填入后继续查询，避免重复扣费。");
+        if(id==Uncertain||string.IsNullOrWhiteSpace(id))throw new InvalidOperationException("The previous submission is unconfirmed. Find its task ID in the Tripo dashboard, then enter it to resume checking without submitting again.");
     }
 }

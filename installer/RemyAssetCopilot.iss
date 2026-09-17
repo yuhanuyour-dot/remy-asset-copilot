@@ -1,4 +1,4 @@
-﻿#define Version "0.5.2"
+﻿#define Version "0.5.3"
 #ifndef Variant
   #define Variant "Standard"
 #endif
@@ -45,25 +45,24 @@ SetupMutex={#Identity}.Setup
 ChangesAssociations=no
 
 [Languages]
-Name: "zhcn"; MessagesFile: "ChineseSimplified.isl"
 Name: "en"; MessagesFile: "compiler:Default.isl"
 
 [Types]
-Name: "full"; Description: "完整安装 / Full"
-Name: "custom"; Description: "自定义 / Custom"; Flags: iscustom
+Name: "full"; Description: "Full installation"
+Name: "custom"; Description: "Custom installation"; Flags: iscustom
 [Components]
-Name: "core"; Description: "Rhino 插件与 GLB 解码 / Plugin and GLB decoder"; Types: full custom; Flags: fixed
+Name: "core"; Description: "Rhino plugin and GLB decoder"; Types: full custom; Flags: fixed
 #if Variant == "Full"
-Name: "vision"; Description: "本地图片尺寸识别 / Offline image size estimates"; Types: full
+Name: "vision"; Description: "Offline image size estimates"; Types: full
 #endif
 [Tasks]
-Name: "desktopicon"; Description: "创建桌面快捷方式 / Create desktop shortcut"; Flags: unchecked
+Name: "desktopicon"; Description: "Create desktop shortcut"; Flags: unchecked
 
 [Files]
 Source: "{#Payload}\AssetCopilot\*"; DestDir: "{app}\AssetCopilot"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: core
 Source: "{#Payload}\Start-AssetCopilot.*"; DestDir: "{app}"; Flags: ignoreversion; Components: core
 Source: "{#Payload}\Install-Update.ps1"; DestDir: "{app}"; Flags: ignoreversion; Components: core
-Source: "{#Payload}\使用说明.txt"; DestDir: "{app}"; Flags: ignoreversion; Components: core
+Source: "{#Payload}\UserGuide.txt"; DestDir: "{app}"; Flags: ignoreversion; Components: core
 #if Variant != "Update"
 Source: "{#Payload}\runtime\node.exe"; DestDir: "{app}\runtime"; Flags: ignoreversion; Components: core
 Source: "{#Payload}\runtime\NODE-LICENSE.txt"; DestDir: "{app}\runtime"; Flags: ignoreversion; Components: core
@@ -74,7 +73,7 @@ Source: "{#Payload}\runtime\vision\*"; DestDir: "{app}\runtime\vision"; Flags: i
 
 [Icons]
 Name: "{group}\Remy Asset Copilot"; Filename: "{sys}\wscript.exe"; Parameters: """{app}\Start-AssetCopilot.vbs"""; WorkingDir: "{app}"; IconFilename: "{code:RhinoExecutable}"
-Name: "{group}\使用说明"; Filename: "{app}\使用说明.txt"
+Name: "{group}\User Guide"; Filename: "{app}\UserGuide.txt"
 Name: "{autodesktop}\Remy Asset Copilot"; Filename: "{sys}\wscript.exe"; Parameters: """{app}\Start-AssetCopilot.vbs"""; WorkingDir: "{app}"; IconFilename: "{code:RhinoExecutable}"; Tasks: desktopicon
 
 [Registry]
@@ -88,10 +87,6 @@ var
   RhinoPage: TInputFileWizardPage;
   OldPlugin: String;
 
-function T(Chinese, English: String): String;
-begin
-  if ActiveLanguage = 'zhcn' then Result := Chinese else Result := English;
-end;
 
 function DefaultInstallDir(Param: String): String;
 var P, Candidate: String;
@@ -133,15 +128,15 @@ end;
 
 procedure InitializeWizard;
 begin
-  RhinoPage := CreateInputFilePage(wpSelectDir, T('查找 Rhino', 'Locate Rhino'),
-    T('选择 Rhino 8 的程序位置', 'Choose your Rhino 8 executable'),
-    T('支持 Windows x64、Rhino 8.0 起的 8.x；兼容 .NET Framework 与 .NET 7/8，无需切换 Rhino 设置。', 'Supports Windows x64, Rhino 8.0 onward (8.x), .NET Framework and .NET 7/8. No Rhino runtime changes needed.'));
+  RhinoPage := CreateInputFilePage(wpSelectDir, 'Locate Rhino',
+    'Choose your Rhino 8 executable',
+    'Supports Windows x64, Rhino 8.0 onward (8.x), .NET Framework and .NET 7/8. No Rhino runtime changes needed.');
   RhinoPage.Add('Rhino.exe:', 'Rhino executable|Rhino.exe', '.exe');
   RhinoPage.Values[0] := ExpandConstant('{param:RHINOEXE|' + DetectRhino + '}');
-  DataPage := CreateInputDirPage(RhinoPage.ID, T('模型与数据目录', 'Models and data'),
-    T('选择模型、贴图和缓存的保存位置', 'Choose where models, textures and cache are saved'),
-    T('卸载程序时保留此目录。已有安装将沿用原数据目录。', 'Uninstall preserves this directory. Upgrades keep the existing data location.'), False, '');
-  DataPage.Add(T('数据目录：', 'Data directory:'));
+  DataPage := CreateInputDirPage(RhinoPage.ID, 'Models and data',
+    'Choose where models, textures and cache are saved',
+    'Uninstall preserves this directory. Upgrades keep the existing data location.', False, '');
+  DataPage.Add('Data directory:');
   DataPage.Values[0] := ExpandConstant('{param:DATADIR|{localappdata}\RemyAssetCopilot{#Suffix}\Data}');
 end;
 
@@ -170,14 +165,14 @@ var Major, Minor, Build, Revision: Word; Marker, Existing, Probe, V: String;
 begin
   Result := '';
   if RhinoIsRunning then begin
-    Result := T('请先保存项目并关闭所有 Rhino 窗口，然后重试。安装器不会结束 Rhino 进程。', 'Save your work and close all Rhino windows before retrying. Setup will not terminate Rhino.'); Exit;
+    Result := 'Save your work and close all Rhino windows before retrying. Setup will not terminate Rhino.'; Exit;
   end;
   if not GetVersionNumbersString(RhinoPage.Values[0], V) then begin
-    Result := T('请选择有效的 Rhino.exe。', 'Select a valid Rhino.exe.'); Exit;
+    Result := 'Select a valid Rhino.exe.'; Exit;
   end;
   if (CompareText(ExtractFileName(RhinoPage.Values[0]), 'Rhino.exe') <> 0) or
      not GetVersionComponents(RhinoPage.Values[0], Major, Minor, Build, Revision) or (Major <> 8) then begin
-    Result := T('请选择 Rhino 8.0 或之后的 Rhino 8。', 'Select Rhino 8.0 or a later Rhino 8 release.'); Exit;
+    Result := 'Select Rhino 8.0 or a later Rhino 8 release.'; Exit;
   end;
   Marker := AddBackslash(WizardDirValue) + 'remy-install.ini';
   Existing := GetIniString('Storage', 'DataRoot', '', Marker);
@@ -185,23 +180,23 @@ begin
      FileExists(AddBackslash(WizardDirValue) + 'runtime\node.exe') then Existing := WizardDirValue;
   if Existing <> '' then DataPage.Values[0] := Existing;
   if not AbsoluteFolder(DataPage.Values[0]) then begin
-    Result := T('请选择本机磁盘上的完整数据目录，例如 E:\RemyData。', 'Choose an absolute folder on a local drive, for example E:\RemyData.'); Exit;
+    Result := 'Choose an absolute folder on a local drive, for example E:\RemyData.'; Exit;
   end;
 #if Variant == "Update"
   if not FileExists(Marker) or not FileExists(AddBackslash(WizardDirValue) + 'runtime\node.exe') or
      not FileExists(AddBackslash(WizardDirValue) + 'AssetCopilot\dist\AssetCopilot.rhp') then begin
-    Result := T('更新包需要已安装 0.5.0 通用版。首次安装或从 0.4.x 升级请使用 Standard 或 Full。', 'This update requires an installed universal release. Use Standard or Full for first installation or 0.4.x migration.'); Exit;
+    Result := 'This update requires an installed universal release. Use Standard or Full for first installation or 0.4.x migration.'; Exit;
   end;
 #endif
   if FileExists(AddBackslash(WizardDirValue) + 'AssetCopilot\dist\AssetCopilot.dll') then begin
-    Result := T('发现旧版重复 DLL。请先将 AssetCopilot\dist\AssetCopilot.dll 备份到其他目录，然后重试。', 'A duplicate AssetCopilot\dist\AssetCopilot.dll exists. Back it up outside this folder and retry.'); Exit;
+    Result := 'A duplicate AssetCopilot\dist\AssetCopilot.dll exists. Back it up outside this folder and retry.'; Exit;
   end;
   if not ForceDirectories(DataPage.Values[0]) then begin
-    Result := T('无法创建数据目录，请选择有写入权限的位置。', 'Cannot create the data directory. Choose a writable folder.'); Exit;
+    Result := 'Cannot create the data directory. Choose a writable folder.'; Exit;
   end;
   Probe := AddBackslash(DataPage.Values[0]) + '.remy-install-write-test-' + GetDateTimeString('yyyymmddhhnnsszzz', '-', ':');
   if not SaveStringToFile(Probe, 'Remy installer permission test', False) then begin
-    Result := T('数据目录不可写，请选择其他位置。', 'The data directory is not writable. Choose another location.'); Exit;
+    Result := 'The data directory is not writable. Choose another location.'; Exit;
   end;
   DeleteFile(Probe);
   OldPlugin := '';
@@ -229,7 +224,7 @@ begin
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
-var Marker, Backup, LegacyDependencies: String;
+var Marker, Backup, LegacyDependencies, LegacyGuide, LegacyShortcut: String;
 begin
   if (CurStep = ssInstall) and FileExists(ExpandConstant('{app}\AssetCopilot\dist\AssetCopilot.rhp')) then begin
     Backup := AddBackslash(DataPage.Values[0]) + 'backups\install-' + GetDateTimeString('yyyymmdd-hhnnss-zzz', '-', ':');
@@ -251,6 +246,12 @@ begin
        not SetIniString('Rhino', 'Exe', RhinoPage.Values[0], Marker) or
        not SetIniString('Install', 'Version', '{#Version}', Marker) then
       RaiseException('Unable to save install configuration.');
+    // Keep an old installer-owned guide link useful, but remove its old menu label.
+    LegacyGuide := ExpandConstant('{app}\使用说明.txt');
+    if FileExists(LegacyGuide) then
+      FileCopy(ExpandConstant('{app}\UserGuide.txt'), LegacyGuide, False);
+    LegacyShortcut := ExpandConstant('{group}\使用说明.lnk');
+    if FileExists(LegacyShortcut) then DeleteFile(LegacyShortcut);
     // Settings and task records are never copied from the author or overwritten.
     ForceDirectories(AddBackslash(DataPage.Values[0]) + 'models');
     ForceDirectories(AddBackslash(DataPage.Values[0]) + 'work');
@@ -260,7 +261,7 @@ end;
 function InitializeUninstall: Boolean;
 begin
   Result := not RhinoIsRunning;
-  if not Result then MsgBox(T('请保存并关闭所有 Rhino 后再卸载。', 'Save and close Rhino before uninstalling.'), mbError, MB_OK);
+  if not Result then MsgBox('Save and close Rhino before uninstalling.', mbError, MB_OK);
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);

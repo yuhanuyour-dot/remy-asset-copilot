@@ -9,7 +9,7 @@ public static class RhinoPlacement
 {
     public static double Meters(RhinoDoc doc)
     {
-        if(doc.ModelUnitSystem is UnitSystem.None or UnitSystem.CustomUnits)throw new InvalidOperationException("请先在 Rhino 文件属性中设置标准文档单位。");
+        if(doc.ModelUnitSystem is UnitSystem.None or UnitSystem.CustomUnits)throw new InvalidOperationException("Set standard document units in Rhino's document properties first.");
         return RhinoMath.UnitScale(doc.ModelUnitSystem,UnitSystem.Meters);
     }
     static List<Mesh> Meshes(AssetData asset)
@@ -24,7 +24,7 @@ public static class RhinoPlacement
                 for(int i=0;i<part.Indices.Count;i+=3)mesh.Faces.AddFace(part.Indices[i],part.Indices[i+1],part.Indices[i+2]);
                 foreach(var uv in part.UV)mesh.TextureCoordinates.Add(uv.X,1-uv.Y);
                 mesh.Normals.ComputeNormals();mesh.Compact();
-                if(!mesh.IsValid)throw new InvalidDataException("模型含无效几何，已阻止放置。");
+                if(!mesh.IsValid)throw new InvalidDataException("Placement was blocked because the model contains invalid geometry.");
             }
             return list;
         }
@@ -32,12 +32,12 @@ public static class RhinoPlacement
     }
     public static bool Place(RhinoDoc doc,AssetData asset,string textures,string taskId)
     {
-        if(RhinoDoc.ActiveDoc?.RuntimeSerialNumber!=doc.RuntimeSerialNumber)throw new InvalidOperationException("当前文档已改变，请重新放置。");
-        var plane=(doc.Views.ActiveView??throw new InvalidOperationException("没有活动视口。")).ActiveViewport.ConstructionPlane();
+        if(RhinoDoc.ActiveDoc?.RuntimeSerialNumber!=doc.RuntimeSerialNumber)throw new InvalidOperationException("The active document changed. Start placement again.");
+        var plane=(doc.Views.ActiveView??throw new InvalidOperationException("There is no active viewport.")).ActiveViewport.ConstructionPlane();
         var meshes=Meshes(asset);
         try
         {
-            using var get=new GetPoint();get.SetCommandPrompt("点击放置点（当前构造平面）；Esc 取消");get.Constrain(plane,false);
+            using var get=new GetPoint();get.SetCommandPrompt("Pick a placement point on the current construction plane; Esc to cancel");get.Constrain(plane,false);
             get.DynamicDraw+=(_,e)=>
             {
                 e.Display.PushModelTransform(Transform.PlaneToPlane(Plane.WorldXY,new Plane(e.CurrentPoint,plane.XAxis,plane.YAxis)));
@@ -45,7 +45,7 @@ public static class RhinoPlacement
                 finally{e.Display.PopModelTransform();}
             };
             if(get.Get()!=GetResult.Point)return false;
-            if(RhinoDoc.ActiveDoc?.RuntimeSerialNumber!=doc.RuntimeSerialNumber)throw new InvalidOperationException("当前文档已改变，已取消放置。");
+            if(RhinoDoc.ActiveDoc?.RuntimeSerialNumber!=doc.RuntimeSerialNumber)throw new InvalidOperationException("Placement was cancelled because the active document changed.");
             var id=InsertMeshes(doc,asset,meshes,textures,taskId,new Plane(get.Point(),plane.XAxis,plane.YAxis));
             doc.Objects.UnselectAll();doc.Objects.Select(id);doc.Views.Redraw();return true;
         }
@@ -59,31 +59,31 @@ public static class RhinoPlacement
     }
     static Guid InsertMeshes(RhinoDoc doc,AssetData asset,List<Mesh> meshes,string textures,string taskId,Plane target)
     {
-        uint undo=doc.BeginUndoRecord("Asset Copilot 放置资产");
+        uint undo=doc.BeginUndoRecord("Asset Copilot: Place asset");
         int definition=-1;Guid objectId=Guid.Empty;var materials=new List<int>();var layers=new List<int>();
         var folder=Path.GetDirectoryName(textures)!;var assetName=AssetStore.Slug(Path.GetFileName(folder));int assetLayer=-1;
         try
         {
             int parent=doc.Layers.FindByFullPath("AssetCopilot",-1);
-            if(parent<0){parent=doc.Layers.Add(new Layer{Name="AssetCopilot",Color=System.Drawing.Color.SlateGray});if(parent<0)throw new InvalidOperationException("无法创建资产图层。");layers.Add(parent);}
-            if(doc.Layers[parent].IsLocked||!doc.Layers[parent].IsVisible)throw new InvalidOperationException("请先解锁并显示 AssetCopilot 图层。");
+            if(parent<0){parent=doc.Layers.Add(new Layer{Name="AssetCopilot",Color=System.Drawing.Color.SlateGray});if(parent<0)throw new InvalidOperationException("Could not create the asset layer.");layers.Add(parent);}
+            if(doc.Layers[parent].IsLocked||!doc.Layers[parent].IsVisible)throw new InvalidOperationException("Unlock and show the AssetCopilot layer first.");
             string name=assetName+"_"+Guid.NewGuid().ToString("N")[..6];
             assetLayer=doc.Layers.Add(new Layer{Name=name,ParentLayerId=doc.Layers[parent].Id});
-            if(assetLayer<0)throw new InvalidOperationException("无法创建资产子图层。");layers.Add(assetLayer);
+            if(assetLayer<0)throw new InvalidOperationException("Could not create the asset sublayer.");layers.Add(assetLayer);
             var attrs=new List<ObjectAttributes>();
             for(int i=0;i<meshes.Count;i++)
             {
                 using var mat=MaterialMaps.Create(asset.Parts[i],textures,"Copilot_"+name+"_"+i);
-                int material=doc.Materials.Add(mat);if(material<0)throw new InvalidOperationException("无法创建 PBR 材质。");materials.Add(material);
+                int material=doc.Materials.Add(mat);if(material<0)throw new InvalidOperationException("Could not create the PBR material.");materials.Add(material);
                 var at=new ObjectAttributes{LayerIndex=assetLayer,MaterialIndex=material,MaterialSource=ObjectMaterialSource.MaterialFromObject};
                 at.SetUserString("AssetCopilot.Task",taskId);at.SetUserString("AssetCopilot.Folder",folder);attrs.Add(at);
             }
             definition=doc.InstanceDefinitions.Add("AI_"+name,"Asset Copilot 0.2 · PBR asset",Point3d.Origin,meshes.Cast<GeometryBase>(),attrs);
-            if(definition<0)throw new InvalidOperationException("创建资产 Block 失败。");
+            if(definition<0)throw new InvalidOperationException("Could not create the asset block.");
             var instanceAttributes=new ObjectAttributes{Name=name,LayerIndex=assetLayer};
             instanceAttributes.SetUserString("AssetCopilot.Folder",folder);instanceAttributes.SetUserString("AssetCopilot.Task",taskId);
             objectId=doc.Objects.AddInstanceObject(definition,Transform.PlaneToPlane(Plane.WorldXY,target),instanceAttributes);
-            if(objectId==Guid.Empty)throw new InvalidOperationException("放置 Block 失败。");
+            if(objectId==Guid.Empty)throw new InvalidOperationException("Could not place the asset block.");
             return objectId;
         }
         catch

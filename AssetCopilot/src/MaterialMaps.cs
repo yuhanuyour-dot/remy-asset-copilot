@@ -18,7 +18,7 @@ public static class MaterialMaps
         using var stream=new MemoryStream(bytes);
         var frame=BitmapFrame.Create(stream,BitmapCreateOptions.PreservePixelFormat,BitmapCacheOption.OnLoad);
         width=frame.PixelWidth;height=frame.PixelHeight;
-        if(width>8192 || height>8192 || (long)width*height>67108864)throw new InvalidDataException("贴图超过 8192 像素上限。");
+        if(width>8192 || height>8192 || (long)width*height>67108864)throw new InvalidDataException("The texture exceeds the 8,192-pixel limit.");
         var converted=new FormatConvertedBitmap(frame,PixelFormats.Bgra32,null,0);
         var data=new byte[checked(width*height*4)];converted.CopyPixels(data,width*4,0);return data;
     }
@@ -102,7 +102,7 @@ public static class MaterialMaps
             if(map==null)return;
             using var texture=new Texture {FileName=SaveMap(folder,map,p,kind),Enabled=true,TextureType=type,ApplyUvwTransform=true,UvwTransform=Uvw(map),WrapU=map.WrapS==33071?TextureUvwWrapping.Clamp:TextureUvwWrapping.Repeat,WrapV=map.WrapT==33071?TextureUvwWrapping.Clamp:TextureUvwWrapping.Repeat};
             if(LinearTextureFlag?.CanWrite==true)LinearTextureFlag.SetValue(texture,linear);
-            if(!pb.SetTexture(texture,type))throw new InvalidOperationException("无法设置 PBR 贴图："+kind);
+            if(!pb.SetTexture(texture,type))throw new InvalidOperationException("Could not assign PBR texture: "+kind);
         }
         Set(p.BaseColorMap,"base",TextureType.PBR_BaseColor,false);
         if(p.BaseColorMap!=null)pb.BaseColor=new Color4f(1,1,1,1);

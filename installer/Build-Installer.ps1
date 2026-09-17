@@ -25,4 +25,4 @@ foreach($variant in $Variants){
     & $Iscc /Q "/DPayload=$payload" "/DVariant=$variant" (Join-Path $PSScriptRoot 'RemyAssetCopilot.iss')
     if($LASTEXITCODE -ne 0){throw "Installer build failed: $variant"}
 }
-Get-ChildItem -LiteralPath (Join-Path $root 'releases') -Filter 'RemyAssetCopilot-Setup-0.5.2-*.exe' | Where-Object { $_.Name -notlike '*-QA.exe' } | ForEach-Object {"$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)"} | Set-Content -LiteralPath (Join-Path $root 'releases/SHA256SUMS-0.5.2.txt') -Encoding ascii
+Get-ChildItem -LiteralPath (Join-Path $root 'releases') -Filter 'RemyAssetCopilot-Setup-0.5.3-*.exe' | Where-Object { $_.Name -notlike '*-QA.exe' } | ForEach-Object {"$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)"} | Set-Content -LiteralPath (Join-Path $root 'releases/SHA256SUMS-0.5.3.txt') -Encoding ascii

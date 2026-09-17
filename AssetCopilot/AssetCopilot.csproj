@@ -9,7 +9,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>AssetCopilot</AssemblyName>
-    <Version>0.5.2</Version>
+    <Version>0.5.3</Version>
 
   </PropertyGroup>
   <ItemGroup>

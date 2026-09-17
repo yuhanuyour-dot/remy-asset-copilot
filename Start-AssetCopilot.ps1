@@ -15,19 +15,19 @@ try {
         $base=[Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::LocalMachine,[Microsoft.Win32.RegistryView]::Registry64)
         try{$install=$base.OpenSubKey('SOFTWARE\McNeel\Rhinoceros\8.0\Install');if($install){$rhino=Join-Path ($install.GetValue('Path')) 'Rhino.exe';$install.Dispose()}}finally{$base.Dispose()}
     }
-    if(-not $rhino -or -not(Test-Path -LiteralPath $rhino)){throw '未找到 Rhino 8，请重新运行安装程序，选择 Rhino.exe。'}
+    if(-not $rhino -or -not(Test-Path -LiteralPath $rhino)){throw 'Rhino 8 was not found. Run the installer again and select Rhino.exe.'}
     $version=[Diagnostics.FileVersionInfo]::GetVersionInfo($rhino)
     $hostVersion=[version]::new($version.FileMajorPart,$version.FileMinorPart,$version.FileBuildPart,$version.FilePrivatePart)
-    if($hostVersion.Major -ne 8){throw "请使用 Rhino 8.0 或之后的 Rhino 8。"}
+    if($hostVersion.Major -ne 8){throw "Use Rhino 8.0 or a later Rhino 8 release."}
     $plugin=Join-Path $root 'AssetCopilot\dist\AssetCopilot.rhp'
-    if(-not(Test-Path -LiteralPath $plugin)){throw '插件文件缺失，请重新运行安装程序修复。'}
+    if(-not(Test-Path -LiteralPath $plugin)){throw 'The plugin file is missing. Run the installer again to repair it.'}
     $key='HKCU:\Software\McNeel\Rhinoceros\8.0\Plug-ins\1f31b7d3-758a-43ef-8d03-6ea3be43eec7\PlugIn'
     $registered=(Get-ItemProperty -LiteralPath $key -ErrorAction SilentlyContinue).FileName
-    if($registered -ne $plugin){throw 'Rhino 当前注册的插件位置与此目录不同，请运行此版本的安装程序修复。'}
+    if($registered -ne $plugin){throw 'Rhino has a different plugin location registered. Run the installer for this version to repair it.'}
     if($CheckOnly){Write-Output "Rhino: $rhino";Write-Output "Plugin: $plugin";Write-Output "Rhino version: $hostVersion / Runtime: Rhino current setting (Framework or Core)";exit 0}
     if(Get-Process -Name Rhino -ErrorAction SilentlyContinue){
         Add-Type -AssemblyName PresentationFramework
-        [System.Windows.MessageBox]::Show('Rhino 已经打开。在 Rhino 命令行输入 AssetCopilot 即可打开插件。','Remy Asset Copilot')|Out-Null
+        [System.Windows.MessageBox]::Show('Rhino is already open. Type AssetCopilot in its command line to open the plugin.','Remy Asset Copilot')|Out-Null
         exit 0
     }
     # No script path on the command line: Unicode and spaces in installation paths are safe.

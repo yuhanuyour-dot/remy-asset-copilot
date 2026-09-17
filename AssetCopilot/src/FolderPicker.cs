@@ -14,7 +14,7 @@ public static class FolderPicker
     {
         using var dialog = new System.Windows.Forms.FolderBrowserDialog
         {
-            Description = "选择模型保存目录", 
+            Description = "Choose a model save folder", 
             SelectedPath = initialDirectory, ShowNewFolderButton = true
         };
         return dialog.ShowDialog(new Owner(owner)) == System.Windows.Forms.DialogResult.OK ? dialog.SelectedPath : null;

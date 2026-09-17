@@ -38,11 +38,11 @@ public static class AppPaths
                 if (line[..equals].Trim().Equals("DataRoot", StringComparison.OrdinalIgnoreCase))
                 {
                     var value = line[(equals + 1)..].Trim();
-                    if (!Compat.IsPathFullyQualified(value)) throw new IOException("安装配置中的数据目录无效，请重新运行安装程序。");
+                    if (!Compat.IsPathFullyQualified(value)) throw new IOException("The configured data folder is invalid. Run the installer again.");
                     return Path.GetFullPath(value);
                 }
             }
-            throw new IOException("安装配置缺少数据目录，请重新运行安装程序。");
+            throw new IOException("The installation configuration has no data folder. Run the installer again.");
         }
         if (Directory.Exists(Path.Combine(installRoot, "AssetCopilot")) &&
             File.Exists(Path.Combine(installRoot, "runtime", "node.exe"))) return installRoot;

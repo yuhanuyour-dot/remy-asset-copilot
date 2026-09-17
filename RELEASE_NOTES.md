@@ -1,13 +1,44 @@
-# Remy Asset Copilot 0.5.2 Beta
+# Remy Asset Copilot 0.5.3 Beta
 
-安装后，用户可正常打开 Rhino，在命令行输入 `AssetCopilot`（无空格）直接打开插件。
+Turn images and text into scene-ready 3D assets directly inside Rhino.
 
-- 同时兼容 Rhino 的 .NET Framework、.NET 7 和 .NET 8 模式，解决 0.5.1 在 Framework 模式下初始化失败的问题。
-- 无需专用启动器，无需 SetDotNetRuntime，不修改 Rhino 的全局运行时设置。
-- 保持原有 UI、动画、材质预览、三种尺寸方式、输入及场景放置流程。
-- 安装时关闭所有 Rhino；安装完成后正常启动 Rhino，输入 AssetCopilot。
-- 首次安装推荐 Full；Standard 不含本地图片尺寸识别；Update 用于已有 0.5.0/0.5.1 通用安装。
+## What's New
 
-要求 Windows 10/11 x64、Rhino 8.0 起的 8.x。使用 Rhino 8.0 SDK 构建；本机 Rhino 8.35 上的 Framework、.NET 7、.NET 8 各通过 161 项界面与场景检查，Framework 核心检查 134 项通过。Rhino 8.0 原版仍待实机验证。
+- Translated the full and compact interfaces, tooltips, accessibility labels,
+  preview instructions, loading states, sizing explanations, errors, and Rhino
+  command prompts into English.
+- Added an English installer, user guide, README, and release notes.
+- Preserved the existing layout, Remy cat animation, loading animation, PBR preview,
+  window switching, model placement, and three sizing modes.
+- Kept support for English and Chinese input descriptions. Your models, filenames,
+  document names, settings, and task records are preserved.
+- Retained the Rhino Framework / .NET 7 / .NET 8 compatibility introduced in 0.5.2.
 
-在线生成需要自己的 Tripo API Key 和额度。安装包尚未代码签名。发布本版时请创建新标签 v0.5.2 并上传对应 0.5.2 EXE，不要继续分发旧版 0.5.1 作为默认安装包。
+## Download and Install
+
+| Installer | Choose this when |
+| --- | --- |
+| `RemyAssetCopilot-Setup-0.5.3-Full.exe` | Installing for the first time with optional offline image size estimation. |
+| `RemyAssetCopilot-Setup-0.5.3-Standard.exe` | Installing without the offline image size estimation model. |
+| `RemyAssetCopilot-Setup-0.5.3-Update.exe` | Updating an existing 0.5.0 or newer universal installation. |
+
+1. Save your work and close all Rhino windows.
+2. Run the installer. Existing users should retain their current program folder.
+3. Open Rhino normally, create or open a document, type `AssetCopilot`, and press Enter.
+4. Enter your own Tripo API key under **Connection & task recovery** to generate models.
+
+No dedicated launcher or manual runtime change is required. Use **+ > Add GLB model**
+to test local preview and placement without spending API credits.
+
+## Requirements and Notes
+
+- Windows 10/11 x64; compatibility target: Rhino 8.0 and subsequent Rhino 8.x releases.
+- Built against the Rhino 8.0 SDK. Testing on the original 8.0 host and an independent
+  clean Windows machine remains pending. See the repository validation notes.
+- Online generation requires your own Tripo API key and credits. Image plus text can
+  use two billable stages: image editing and 3D generation.
+- Real-world sizes are estimates, not measurements from a photograph.
+- This is an unsigned beta release. Windows or your browser may display a reputation warning.
+- `SHA256SUMS-0.5.3.txt` contains installer checksums.
+- Download an `.exe` installer to install the plugin. The automatic **Source code**
+  archives are intended for developers.

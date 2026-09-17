@@ -2,14 +2,15 @@
 
 Turn images and text into scene-ready 3D assets directly inside Rhino.
 
-**Version 0.5.2 Beta · Windows installer**
+**Version 0.5.3 Beta · Windows installer**
 
 Install Remy, open Rhino normally, and run `AssetCopilot` in the command line. No dedicated launcher or manual .NET runtime switching is required.
 
-[Download 0.5.2 Beta](https://github.com/yuhanuyour-dot/remy-asset-copilot/releases/tag/v0.5.2) · [All releases](https://github.com/yuhanuyour-dot/remy-asset-copilot/releases)
+[Download 0.5.3 Beta](https://github.com/yuhanuyour-dot/remy-asset-copilot/releases/tag/v0.5.3) · [All releases](https://github.com/yuhanuyour-dot/remy-asset-copilot/releases)
 
 ## Features
 
+- English interface, tooltips, progress messages, Rhino prompts, and installer.
 - Generate assets from text, an uploaded or pasted image, or an image with a text description.
 - Import local GLB files, including supported compressed models.
 - Preview PBR materials and place models directly into a Rhino scene.
@@ -21,16 +22,16 @@ Real-world dimensions are estimates, not measurements from a photograph. Image-b
 
 ## Download
 
-Open the **0.5.2 Beta** release and expand **Assets**. Choose an installer:
+Open the **0.5.3 Beta** release and expand **Assets**. Choose an installer:
 
 | File | Use |
 | --- | --- |
-| `RemyAssetCopilot-Setup-0.5.2-Full.exe` | Recommended for first-time installation. Includes the optional local image-based size estimation component. |
-| `RemyAssetCopilot-Setup-0.5.2-Standard.exe` | Smaller installer without the local image-based size estimation model. Supports generation, GLB import, and the other sizing methods. |
-| `RemyAssetCopilot-Setup-0.5.2-Update.exe` | Updates an existing 0.5.0 or newer universal installation. Not suitable for first-time installation or migration from 0.4.x. |
-| `SHA256SUMS-0.5.2.txt` | SHA-256 checksums for verifying the installers. |
+| `RemyAssetCopilot-Setup-0.5.3-Full.exe` | Recommended for first-time installation. Includes the optional local image-based size estimation component. |
+| `RemyAssetCopilot-Setup-0.5.3-Standard.exe` | Smaller installer without the local image-based size estimation model. Supports generation, GLB import, and the other sizing methods. |
+| `RemyAssetCopilot-Setup-0.5.3-Update.exe` | Updates an existing 0.5.0 or newer universal installation. Not suitable for first-time installation or migration from 0.4.x. |
+| `SHA256SUMS-0.5.3.txt` | SHA-256 checksums for verifying the installers. |
 
-The **Code → Download ZIP** option and automatically generated **Source code** archives contain source files, not an installer. Because 0.5.2 is a pre-release, an older release may still carry GitHub's **Latest** label; select 0.5.2 explicitly.
+The **Code → Download ZIP** option and automatically generated **Source code** archives contain source files, not an installer. Because 0.5.3 is a pre-release, an older release may still carry GitHub's **Latest** label; select 0.5.3 explicitly.
 
 ## Install and Run
 
@@ -52,11 +53,11 @@ For an existing installation, retain the same program directory when upgrading. 
 - **Platform:** Windows 10/11, x64.
 - **Target host:** Rhino 8.0 and subsequent Rhino 8.x releases, built against the Rhino 8.0 SDK.
 - **Runtime modes:** .NET Framework, .NET 7, and .NET 8.
-- **Verified host:** Rhino 8.35; 161 interface, material, sizing, and placement checks passed in each runtime mode. The installed plugin also passed direct `AssetCopilot` command-launch checks in all three modes.
+- **Verified host:** Rhino 8.35. See [validation notes](installer/VALIDATION-0.5.3.md) for checks performed on this release.
 - **Pending:** Testing on the original Rhino 8.0 host and independent clean-machine validation.
 - **Not covered:** macOS, Rhino 7, and Rhino 9.
 
-Version 0.5.2 fixes the .NET Framework initialization failure in 0.5.1. Use the 0.5.2 installer for the normal Rhino command workflow.
+Version 0.5.3 translates the plugin and installer to English while retaining the layout, animations, and compatibility fixes from 0.5.2. English and Chinese descriptions remain supported; user content is not rewritten.
 
 This is a beta release. The installer is not code-signed, so Windows or your browser may display a reputation warning.
 
@@ -83,13 +84,13 @@ AssetCopilot\build.cmd
 
 The first build restores pinned Rhino 8.0 and WebView2 SDK packages from NuGet; it does not require local Rhino development references. The source supports `net48` and `net7.0-windows`. The installer distributes the `net48` compatibility assembly tested in all three Rhino runtime modes.
 
-Building the Windows installers additionally requires Python, Inno Setup, and the runtime components described in [the installer build guide](installer/README.md) (currently in Chinese).
+Building the Windows installers additionally requires Python, Inno Setup, and the runtime components described in [the installer build guide](installer/README.md).
 
 Source code and redistributable resources are in `AssetCopilot/src`, `AssetCopilot/viewer`, `AssetCopilot/tools`, and `AssetCopilot/sample`. Personal images, generated assets, API keys, task records, build caches, and large runtime components are excluded from the source export.
 
 ## Publishing Updates
 
-Commit the matching source code and README to the repository before creating a release tag. For this version, use `v0.5.2` and mark the release as a pre-release. Attach the Full, Standard, and Update installers and `SHA256SUMS-0.5.2.txt` to the release rather than committing binaries to the source tree.
+Commit the matching source code and README to the repository before creating a release tag. For this version, use `v0.5.3` and mark the release as a pre-release. Attach the Full, Standard, and Update installers and `SHA256SUMS-0.5.3.txt` to the release rather than committing binaries to the source tree.
 
 Publishing a release does not automatically update the README or source files on the default branch. See [RELEASE_NOTES.md](RELEASE_NOTES.md) for the release description.
 
