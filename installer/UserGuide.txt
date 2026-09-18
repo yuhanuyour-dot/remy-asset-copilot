@@ -1,4 +1,4 @@
-﻿Remy Asset Copilot 0.5.3 Beta - Windows installer
+Remy Asset Copilot 0.5.4 Beta - Windows installer
 
 Requirements
 Windows 10/11 x64 and Rhino 8.0 or a later Rhino 8.x release.
@@ -24,7 +24,7 @@ Upgrading an existing Full installation with Standard preserves image recognitio
 Setup does not automatically download extra components.
 
 Using Remy
-- Type a description, add an image with +, or paste an image with Ctrl+V.
+- Type a description, drop a JPG/PNG image into the preview, add one with +, or paste with Ctrl+V.
 - Use + > Add GLB model to preview and place an existing GLB without API credits.
 - Open Connection & task recovery to enter your Tripo API key. It is used only
   in the current window. Online generation requires your own API credits.
@@ -58,7 +58,9 @@ Troubleshooting
 - Plugin file or runtime missing: run Standard or Full again to repair it.
 - Image size recognition unavailable: run Full and select its optional component.
   Text-based size estimation and Manual size remain available.
-- Preview requires the Microsoft Edge WebView2 Runtime used by Rhino.
+- Preview requires the Microsoft Edge WebView2 Runtime used by Rhino. If it fails,
+  generation progress stays visible. Click Retry preview when idle to rebuild the
+  preview without submitting another task. Diagnostics: data folder/work/preview-errors.log.
 - The plugin does not change Rhino's global runtime preference.
 - API errors: use Check connection for a read-only authentication check. If a
   generation submission is unconfirmed, find its task ID in the Tripo dashboard

@@ -1,4 +1,4 @@
-# Remy Asset Copilot 0.5.3
+# Remy Asset Copilot 0.5.4
 
 This directory contains the Rhino plugin source and redistributable resources.
 See the [main README](../README.md) for installation and usage, and the

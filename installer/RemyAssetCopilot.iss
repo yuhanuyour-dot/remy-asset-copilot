@@ -1,4 +1,4 @@
-﻿#define Version "0.5.3"
+#define Version "0.5.4"
 #ifndef Variant
   #define Variant "Standard"
 #endif

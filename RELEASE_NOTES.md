@@ -1,26 +1,29 @@
-# Remy Asset Copilot 0.5.3 Beta
+# Remy Asset Copilot 0.5.4 Beta
 
 Turn images and text into scene-ready 3D assets directly inside Rhino.
 
 ## What's New
 
-- Translated the full and compact interfaces, tooltips, accessibility labels,
-  preview instructions, loading states, sizing explanations, errors, and Rhino
-  command prompts into English.
-- Added an English installer, user guide, README, and release notes.
-- Preserved the existing layout, Remy cat animation, loading animation, PBR preview,
-  window switching, model placement, and three sizing modes.
-- Kept support for English and Chinese input descriptions. Your models, filenames,
-  document names, settings, and task records are preserved.
-- Retained the Rhino Framework / .NET 7 / .NET 8 compatibility introduced in 0.5.2.
+- Fixed **Preview unavailable** after closing and reopening Remy in the same Rhino
+  session. Remy now reuses the WebView loader already loaded by Rhino or an earlier
+  plugin window.
+- Added image drag-and-drop directly into the preview, including the startup
+  placeholder. Drop one JPG or PNG file of up to 20 MB. The image appears in the
+  existing input attachment area, with its original filename.
+- Restored the supplied looping pixel-block loading animation and live generation
+  stage/progress text. Native feedback remains visible if the browser preview fails.
+- Added **Retry preview** for recovery without restarting Rhino or resubmitting a
+  generation task.
+- Preserved the English UI, full/compact layouts, Remy cat animation, PBR materials,
+  sizing modes, and Framework / .NET 7 / .NET 8 compatibility.
 
 ## Download and Install
 
 | Installer | Choose this when |
 | --- | --- |
-| `RemyAssetCopilot-Setup-0.5.3-Full.exe` | Installing for the first time with optional offline image size estimation. |
-| `RemyAssetCopilot-Setup-0.5.3-Standard.exe` | Installing without the offline image size estimation model. |
-| `RemyAssetCopilot-Setup-0.5.3-Update.exe` | Updating an existing 0.5.0 or newer universal installation. |
+| `RemyAssetCopilot-Setup-0.5.4-Full.exe` | Installing for the first time with optional offline image size estimation. |
+| `RemyAssetCopilot-Setup-0.5.4-Standard.exe` | Installing without the offline image size estimation model. |
+| `RemyAssetCopilot-Setup-0.5.4-Update.exe` | Updating an existing 0.5.0 or newer universal installation. |
 
 1. Save your work and close all Rhino windows.
 2. Run the installer. Existing users should retain their current program folder.
@@ -39,6 +42,6 @@ to test local preview and placement without spending API credits.
   use two billable stages: image editing and 3D generation.
 - Real-world sizes are estimates, not measurements from a photograph.
 - This is an unsigned beta release. Windows or your browser may display a reputation warning.
-- `SHA256SUMS-0.5.3.txt` contains installer checksums.
+- `SHA256SUMS-0.5.4.txt` contains installer checksums.
 - Download an `.exe` installer to install the plugin. The automatic **Source code**
   archives are intended for developers.

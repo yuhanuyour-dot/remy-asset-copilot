@@ -2,16 +2,16 @@
 
 Turn images and text into scene-ready 3D assets directly inside Rhino.
 
-**Version 0.5.3 Beta · Windows installer**
+**Version 0.5.4 Beta · Windows installer**
 
 Install Remy, open Rhino normally, and run `AssetCopilot` in the command line. No dedicated launcher or manual .NET runtime switching is required.
 
-[Download 0.5.3 Beta](https://github.com/yuhanuyour-dot/remy-asset-copilot/releases/tag/v0.5.3) · [All releases](https://github.com/yuhanuyour-dot/remy-asset-copilot/releases)
+[Download 0.5.4 Beta](https://github.com/yuhanuyour-dot/remy-asset-copilot/releases/tag/v0.5.4) · [All releases](https://github.com/yuhanuyour-dot/remy-asset-copilot/releases)
 
 ## Features
 
 - English interface, tooltips, progress messages, Rhino prompts, and installer.
-- Generate assets from text, an uploaded or pasted image, or an image with a text description.
+- Generate assets from text, an uploaded, dropped, or pasted image, or an image with a text description.
 - Import local GLB files, including supported compressed models.
 - Preview PBR materials and place models directly into a Rhino scene.
 - Choose manual dimensions, estimated real-world dimensions, or a selected reference face, with conversion to Rhino document units.
@@ -22,16 +22,16 @@ Real-world dimensions are estimates, not measurements from a photograph. Image-b
 
 ## Download
 
-Open the **0.5.3 Beta** release and expand **Assets**. Choose an installer:
+Open the **0.5.4 Beta** release and expand **Assets**. Choose an installer:
 
 | File | Use |
 | --- | --- |
-| `RemyAssetCopilot-Setup-0.5.3-Full.exe` | Recommended for first-time installation. Includes the optional local image-based size estimation component. |
-| `RemyAssetCopilot-Setup-0.5.3-Standard.exe` | Smaller installer without the local image-based size estimation model. Supports generation, GLB import, and the other sizing methods. |
-| `RemyAssetCopilot-Setup-0.5.3-Update.exe` | Updates an existing 0.5.0 or newer universal installation. Not suitable for first-time installation or migration from 0.4.x. |
-| `SHA256SUMS-0.5.3.txt` | SHA-256 checksums for verifying the installers. |
+| `RemyAssetCopilot-Setup-0.5.4-Full.exe` | Recommended for first-time installation. Includes the optional local image-based size estimation component. |
+| `RemyAssetCopilot-Setup-0.5.4-Standard.exe` | Smaller installer without the local image-based size estimation model. Supports generation, GLB import, and the other sizing methods. |
+| `RemyAssetCopilot-Setup-0.5.4-Update.exe` | Updates an existing 0.5.0 or newer universal installation. Not suitable for first-time installation or migration from 0.4.x. |
+| `SHA256SUMS-0.5.4.txt` | SHA-256 checksums for verifying the installers. |
 
-The **Code → Download ZIP** option and automatically generated **Source code** archives contain source files, not an installer. Because 0.5.3 is a pre-release, an older release may still carry GitHub's **Latest** label; select 0.5.3 explicitly.
+The **Code → Download ZIP** option and automatically generated **Source code** archives contain source files, not an installer. Because 0.5.4 is a pre-release, an older release may still carry GitHub's **Latest** label; select 0.5.4 explicitly.
 
 ## Install and Run
 
@@ -53,13 +53,19 @@ For an existing installation, retain the same program directory when upgrading. 
 - **Platform:** Windows 10/11, x64.
 - **Target host:** Rhino 8.0 and subsequent Rhino 8.x releases, built against the Rhino 8.0 SDK.
 - **Runtime modes:** .NET Framework, .NET 7, and .NET 8.
-- **Verified host:** Rhino 8.35. See [validation notes](installer/VALIDATION-0.5.3.md) for checks performed on this release.
+- **Verified host:** Rhino 8.35. See [validation notes](installer/VALIDATION-0.5.4.md) for checks performed on this release.
 - **Pending:** Testing on the original Rhino 8.0 host and independent clean-machine validation.
 - **Not covered:** macOS, Rhino 7, and Rhino 9.
 
-Version 0.5.3 translates the plugin and installer to English while retaining the layout, animations, and compatibility fixes from 0.5.2. English and Chinese descriptions remain supported; user content is not rewritten.
+Version 0.5.4 fixes preview startup after reopening Remy, adds image drag-and-drop in the preview, and restores visible loading feedback. The English UI, layout, animations, and runtime compatibility are retained. English and Chinese descriptions remain supported; user content is not rewritten.
 
 This is a beta release. The installer is not code-signed, so Windows or your browser may display a reputation warning.
+
+## Preview and Progress
+
+Drop one JPG or PNG image (up to 20 MB) onto the preview, click to choose an image, or paste into the input. During generation, the original pixel-block animation loops above the current stage and progress. The compact window also shows progress.
+
+If the preview fails, generation feedback remains visible and **Retry preview** becomes available when idle. Retry rebuilds only the preview; it does not submit another generation request. Preview diagnostics are saved locally in the data folder at `work/preview-errors.log`.
 
 ## API and Local Data
 
@@ -90,7 +96,7 @@ Source code and redistributable resources are in `AssetCopilot/src`, `AssetCopil
 
 ## Publishing Updates
 
-Commit the matching source code and README to the repository before creating a release tag. For this version, use `v0.5.3` and mark the release as a pre-release. Attach the Full, Standard, and Update installers and `SHA256SUMS-0.5.3.txt` to the release rather than committing binaries to the source tree.
+Commit the matching source code and README to the repository before creating a release tag. For this version, use `v0.5.4` and mark the release as a pre-release. Attach the Full, Standard, and Update installers and `SHA256SUMS-0.5.4.txt` to the release rather than committing binaries to the source tree.
 
 Publishing a release does not automatically update the README or source files on the default branch. See [RELEASE_NOTES.md](RELEASE_NOTES.md) for the release description.
 

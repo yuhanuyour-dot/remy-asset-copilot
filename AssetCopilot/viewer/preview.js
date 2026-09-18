@@ -11,6 +11,27 @@ let blocked=false,press=null,modelLoading=false,playing=false,lastVideoTime=-1,v
 let status={busy:false,text:'',persistent:false},localError='';
 const requestPhoto=()=>{if(!blocked)send({type:'pick-image'});};
 picker.addEventListener('click',requestPhoto);
+// File drops must be handled inside the WebView HWND, not just by its WPF parent.
+let dropDepth=0,readingDrop=false;
+const dropZone=document.getElementById('drop-zone');
+function clearDrop(){dropDepth=0;dropZone.hidden=true;}
+function fileDrag(e){return Array.from(e.dataTransfer?.types||[]).includes('Files');}
+window.addEventListener('dragenter',e=>{e.preventDefault();if(!fileDrag(e)||blocked||readingDrop)return;dropDepth++;dropZone.hidden=false;});
+window.addEventListener('dragover',e=>{e.preventDefault();if(e.dataTransfer)e.dataTransfer.dropEffect=!blocked&&!readingDrop&&fileDrag(e)?'copy':'none';});
+window.addEventListener('dragleave',e=>{e.preventDefault();if(--dropDepth<=0)clearDrop();});
+window.addEventListener('dragend',clearDrop);
+window.addEventListener('blur',clearDrop);
+window.addEventListener('drop',async e=>{
+ e.preventDefault();clearDrop();if(blocked||readingDrop)return;
+ const files=Array.from(e.dataTransfer?.files||[]),file=files[0];
+ if(files.length!==1||!file||! /\.(png|jpe?g)$/i.test(file.name)||!file.size||file.size>20*1024*1024){localError='Drop one JPG or PNG image of up to 20 MB.';present();return;}
+ readingDrop=true;
+ try{
+  const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]);r.onerror=()=>reject(new Error('Could not read image'));r.readAsDataURL(file);});
+  if(!blocked){localError='';present();send({type:'drop-image',name:file.name,data});}
+ }catch{localError='Could not read the image. Please try again.';present();}
+ finally{readingDrop=false;}
+});
 let renderer, camera, controls, scene, current, sequence=0;
 function drawBlocks(){
  if(!playing||video.readyState<2||video.currentTime===lastVideoTime)return;
@@ -22,7 +43,7 @@ function drawBlocks(){
  pixels.putImageData(frame,0,0);
 }
 function present(){
- blocked=status.busy||modelLoading;picker.disabled=blocked;controls&&(controls.enabled=!blocked);
+ blocked=status.busy||modelLoading;if(blocked)clearDrop();picker.disabled=blocked;controls&&(controls.enabled=!blocked);
  renderer?.domElement.setAttribute('aria-disabled',String(blocked));document.body.setAttribute('aria-busy',String(blocked));
  const visible=blocked||status.persistent||!!localError;
  const animate=blocked&&!status.persistent&&!localError;

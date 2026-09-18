@@ -23,7 +23,7 @@ public sealed partial class CopilotWindow : Window
     readonly Slider faceSlider=new(){Minimum=500,Maximum=25000,Value=5000,TickFrequency=100,IsSnapToTickEnabled=true};
     readonly Button generate=new(),place=new(),resume=new(),stop=new(),reset=new(),check=new();
     readonly CheckBox autoPlace=new(){Content="Place after generation (pick a point in Rhino)",IsChecked=true,Margin=new Thickness(0,8,0,4)};
-    readonly PbrPreview viewport=new();
+    PbrPreview viewport=new();
     readonly Border composerFrame;
     readonly SizingPanel sizing;
     readonly LocalSizeInference sizeInference=new();
@@ -42,7 +42,7 @@ public sealed partial class CopilotWindow : Window
     public CopilotWindow(string? sample=null)
     {
         AssetStore.Initialize();
-        Title="Remy Asset Copilot 0.5.3";Width=540;Height=Math.Min(910,SystemParameters.WorkArea.Height-40);MinWidth=450;MinHeight=620;
+        Title="Remy Asset Copilot 0.5.4";Width=540;Height=Math.Min(910,SystemParameters.WorkArea.Height-40);MinWidth=450;MinHeight=620;
         WindowStartupLocation=WindowStartupLocation.CenterScreen;Background=new SolidColorBrush(Color.FromRgb(245,245,247));FontFamily=new FontFamily("Segoe UI");FontSize=12;
         Resources.Add(typeof(Button),XamlReader.Parse("<Style xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' TargetType='Button'><Setter Property='Cursor' Value='Hand'/><Setter Property='Padding' Value='12,8'/><Setter Property='Background' Value='#EEEEF1'/><Setter Property='Foreground' Value='#252527'/><Setter Property='BorderThickness' Value='0'/><Setter Property='Margin' Value='0,3,6,3'/><Setter Property='Template'><Setter.Value><ControlTemplate TargetType='Button'><Border CornerRadius='16' Background='{TemplateBinding Background}' Padding='{TemplateBinding Padding}'><ContentPresenter HorizontalAlignment='Center' VerticalAlignment='Center'/></Border><ControlTemplate.Triggers><Trigger Property='IsEnabled' Value='False'><Setter Property='Opacity' Value='0.4'/></Trigger><Trigger Property='IsMouseOver' Value='True'><Setter Property='Opacity' Value='0.82'/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style>"));
         var root=new StackPanel{Margin=new Thickness(18,14,18,18)};
@@ -71,10 +71,10 @@ public sealed partial class CopilotWindow : Window
         model.Style=UiTheme.ModelPicker;model.Width=104;model.Margin=new Thickness(0,0,8,0);model.VerticalAlignment=VerticalAlignment.Center;model.HorizontalAlignment=HorizontalAlignment.Right;AutomationProperties.SetName(model,"Generation model");Grid.SetColumn(model,2);toolbar.Children.Add(model);
         inputHint.FontSize=11;inputHint.Foreground=UiTheme.Muted;inputHint.TextWrapping=TextWrapping.Wrap;inputHint.Margin=new Thickness(8,6,8,0);composer.Children.Add(toolbar);composer.Children.Add(inputHint);
         inputBox.PreviewKeyDown+=(_,e)=>{if(e.Key==Key.V&&Keyboard.Modifiers.HasFlag(ModifierKeys.Control)&&!busy&&(Clipboard.ContainsImage()||Clipboard.ContainsFileDropList())){PastePhoto();e.Handled=true;}};
-        inputBox.AllowDrop=true;inputBox.PreviewDragOver+=(_,e)=>{e.Effects=e.Data.GetDataPresent(DataFormats.FileDrop)?DragDropEffects.Copy:DragDropEffects.None;e.Handled=true;};
+        inputBox.AllowDrop=true;inputBox.PreviewDragOver+=(_,e)=>{e.Effects=!busy&&e.Data.GetDataPresent(DataFormats.FileDrop)?DragDropEffects.Copy:DragDropEffects.None;e.Handled=true;};
         inputBox.Drop+=async(_,e)=>{if(busy)return;try{if(e.Data.GetData(DataFormats.FileDrop) is string[] paths&&paths.Length==1){if(Path.GetExtension(paths[0]).Equals(".glb",StringComparison.OrdinalIgnoreCase))await Local(paths[0]);else LoadPhoto(paths[0]);}else throw new ArgumentException("Add one image or GLB at a time.");}catch(Exception ex){Error(ex);}e.Handled=true;};
         preview.Children.Add(viewport);InstallPreviewStartup();
-        viewport.ImageRequested+=RequestPhoto;
+        ConnectPreview();
         preview.HorizontalAlignment=HorizontalAlignment.Stretch;body.SizeChanged+=(_,_)=>{preview.Width=body.ActualWidth;preview.Height=Math.Min(360,body.ActualWidth);};
         preview.Margin=new Thickness(0,0,0,16);body.Children.Add(preview);
         body.Children.Add(inputBox);
@@ -116,7 +116,7 @@ public sealed partial class CopilotWindow : Window
         dimension.TextChanged+=(_,_)=>QueueRender();percentage.TextChanged+=(_,_)=>QueueRender();axis.SelectionChanged+=(_,_)=>QueueRender();units.SelectionChanged+=(_,_)=>QueueRender();
         changeTimer.Tick+=async(_,_)=>{changeTimer.Stop();await Render();};
 
-        Activated+=(_,_)=>{Context();if(!busy)QueueRender();};Closing+=(_,_)=>cancellation?.Cancel();Closed+=(_,_)=>{sizeRequest?.Cancel();sizeInference.Dispose();changeTimer.Stop();key.Clear();renderSequence++;logo.Dispose();viewport.ClosePreview();};
+        Activated+=(_,_)=>{Context();if(!busy)QueueRender();};Closing+=(_,_)=>cancellation?.Cancel();Closed+=(_,_)=>{sizeRequest?.Cancel();sizeInference.Dispose();changeTimer.Stop();key.Clear();renderSequence++;logo.Dispose();startupPlayer.Close();viewport.ClosePreview();};
         record=AssetStore.Restore();if(record!=null){task.Text=record.ActiveTaskId;savedPath.Text=record.Folder;sizing.Restore(record.Sizing);}
         ready=true;Context();Buttons();QueueRender();
         if(sample!=null)Loaded+=async(_,_)=>await Local(sample);

@@ -67,8 +67,8 @@ property on newer Rhino versions is accessed reflectively; older hosts retain
 their native defaults.
 
 Dependency versions remain as recorded in `runtime-manifests/dotnet-0.5.2.json`;
-0.5.3 is an English localization release and does not upgrade dependencies.
-See [VALIDATION-0.5.3.md](VALIDATION-0.5.3.md) for this release's verification.
+0.5.4 fixes preview startup, image drops, and loading feedback without upgrading dependencies.
+See [VALIDATION-0.5.4.md](VALIDATION-0.5.4.md) for this release's verification.
 
 Installers are currently unsigned beta builds. Code signing and independent
 clean-machine testing are still required before treating them as production releases.
